@@ -116,14 +116,14 @@ jobs:
         shell: bash
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
-          mv "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
+          mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
           if [ "${{ matrix.name }}" == "macOS" ]; then
-            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
-            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
           elif [ "${{ matrix.name }}" == "Windows" ]; then
-            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.exe" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.exe" ${{ env.PACKAGE_DIR }};
           elif [ "${{ matrix.name }}" == "Linux" ]; then
-            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}" ${{ env.PACKAGE_DIR }};
+            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}" ${{ env.PACKAGE_DIR }};
           else
             echo "Unknown OS";
           fi;
@@ -144,7 +144,7 @@ jobs:
           codesign --force -s "${{ secrets.DEV_ID_APP}}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
           codesign --force -s "${{ secrets.DEV_ID_APP}}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component" --deep --strict --options=runtime --timestamp;
           # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
-          codesign --entitlements "${{ env.BUILD_DIR }}/${TARGET_NAME}/${TARGET_NAME}_artefacts/JuceLibraryCode/${TARGET_NAME}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP}}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app" --deep --strict --options=runtime --timestamp;
+          codesign --entitlements "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/JuceLibraryCode/${TARGET_NAME}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP}}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app" --deep --strict --options=runtime --timestamp;
           # Here we check the code signitures
           codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3";
           codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component";
