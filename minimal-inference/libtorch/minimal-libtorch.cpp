@@ -15,11 +15,8 @@ int main(int argc, const char* argv[]) {
     std::string filepath = MODELS_PATH;
     const std::string modelpath = filepath + "/model.pt";
 
-    std::cout << "Loading model from " << modelpath << std::endl;
-
     torch::jit::script::Module module;
     try {
-     // Deserialize the ScriptModule from a file using torch::jit::load().
         module = torch::jit::load(modelpath);
     }
     catch (const c10::Error& e) {
@@ -28,6 +25,20 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    // std::cout << "ok\n";
+    const int inputSize = 150;
+    std::array<float, inputSize> inputData;
+    for (int i = 0; i < inputSize; i++) {
+        inputData[i] = i * 0.1f;
+    }
+
+    at::Tensor frame = torch::from_blob(inputData.data(), {inputSize}).reshape({1, 1, inputSize});
+
+    std::vector<torch::jit::IValue> inputs;
+    inputs.push_back(frame);
+
+    auto output = module.forward(inputs).toTensor();
+
+    std::cout << "Output: " << output.item().toFloat() << '\n';
+
     return 0;
 }
