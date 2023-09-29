@@ -47,29 +47,6 @@ else()
     endif()
 endif()
 
-# Find the libraries again
-find_library(torch_lib
-        NAMES torch
-        PATHS ${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}/lib
-        )
-if (NOT torch_lib)
-    message(FATAL_ERROR "torch could not be included")
-endif()
-
-set(MACOSX_RPATH TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_INSTALL_RPATH "@loader_path/../Resources/libtorch")
-
-set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} ")
-set(CMAKE_CXX_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-if (MSVC)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive- ")
-endif(MSVC)
-
 if (MSVC)
     if (EXISTS "C:/Program Files (x86)/Intel/oneAPI/mkl/2023.0.0/lib/intel64")
         link_directories("C:/Program Files (x86)/Intel/oneAPI/mkl/2023.0.0/lib/intel64")
@@ -78,6 +55,5 @@ if (MSVC)
     endif()
 endif (MSVC)
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}/")
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
