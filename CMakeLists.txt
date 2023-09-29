@@ -44,6 +44,14 @@ endif()
 # Juce is included via a submodule
 add_subdirectory(modules/JUCE)
 
+# Install inference engines
+
+# ONNXRuntime
+include(cmake/SetupOnnxRuntime.cmake)
+# LibTorch
+include(cmake/SetupLibTorch.cmake)
+
+
 # Include the assets and common directories
 add_subdirectory(assets)
 
@@ -108,9 +116,13 @@ target_compile_definitions(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME}
     PRIVATE
-        # BinaryData
+		onnxruntime
+		torch
+
+		# BinaryData
         juce::juce_audio_utils
-        juce::juce_osc
+        juce::juce_dsp
+        juce::juce_core
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
