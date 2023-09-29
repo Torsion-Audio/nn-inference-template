@@ -10,7 +10,7 @@
 #include "InferenceThread.h"
 #include "../utils/RingBuffer.h"
 
-class InferenceManager {
+class InferenceManager : private InferenceThread::Listener {
 public:
     InferenceManager();
 
@@ -23,7 +23,7 @@ public:
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);
     void calculateLatency(int maxSamplesPerBuffer);
-
+    void inferenceThreadFinished(juce::AudioBuffer<float>& buffer) override;
 private:
     InferenceThread inferenceThread;
     RingBuffer receiveRingBuffer;

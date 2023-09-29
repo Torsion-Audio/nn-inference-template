@@ -18,6 +18,14 @@ public:
     InferenceThread();
     ~InferenceThread() override;
 
+    class Listener {
+    public:
+        virtual ~Listener() = default;
+        virtual void inferenceThreadFinished(juce::AudioBuffer<float>& buffer) {juce::ignoreUnused(buffer);}
+    };
+    void addProcessorListener(Listener* listenerToAdd) {listeners.add(listenerToAdd);}
+    void removeProcessorListener(Listener* listenerToRemove) {listeners.remove(listenerToRemove);}
+
     void prepare(const juce::dsp::ProcessSpec& spec);
     void sendAudio(juce::AudioBuffer<float>& buffer);
     int getLatency() const;
@@ -36,6 +44,9 @@ private:
     void run() override;
     void setModelInputSize(int newModelInputSize);
     void loadInternalModel();
+    void returnProcessedBuffer(juce::AudioBuffer<float>& buffer) {
+        listeners.call([&buffer](Listener& l) { l.inferenceThreadFinished(buffer); });
+    }
 
 private:
     bool startUp = true;
@@ -61,6 +72,8 @@ private:
     LibtorchProcessor libtorchProcessor;
 
     InferenceBackend currentBackend = TFLite;
+
+    juce::ListenerList<Listener> listeners;
 
     juce::AudioBuffer<float> prevBuffer;
     juce::AudioBuffer<float> combinedBuffer;

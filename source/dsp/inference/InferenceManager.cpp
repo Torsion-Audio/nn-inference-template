@@ -6,12 +6,7 @@
 
 InferenceManager::InferenceManager()
 {
-    inferenceThread.onNewProcessedBuffer = [this] (juce::AudioBuffer<float> buffer) {
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-            receiveRingBuffer.pushSample(buffer.getSample(0, sample), 0);
-        }
-        return 0;
-    };
+
 }
 
 void InferenceManager::parameterChanged(const juce::String &parameterID, float newValue) {
@@ -71,4 +66,10 @@ void InferenceManager::calculateLatency(int maxSamplesPerBuffer) {
 
 int InferenceManager::getLatency() const {
     return latencyInSamples;
+}
+
+void InferenceManager::inferenceThreadFinished(juce::AudioBuffer<float> &buffer) {
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+        receiveRingBuffer.pushSample(buffer.getSample(0, sample), 0);
+    }
 }
