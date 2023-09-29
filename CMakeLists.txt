@@ -50,7 +50,11 @@ add_subdirectory(modules/JUCE)
 include(cmake/SetupOnnxRuntime.cmake)
 # LibTorch
 include(cmake/SetupLibTorch.cmake)
+# TensorflowLite
+include(cmake/SetupTensorflowLite.cmake)
 
+# Add minimal examples
+add_subdirectory(minimal-inference)
 
 # Include the assets and common directories
 add_subdirectory(assets)
@@ -118,7 +122,7 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE
 		onnxruntime
 		torch
-
+        tensorflowlite_c
 		# BinaryData
         juce::juce_audio_utils
         juce::juce_dsp
@@ -164,7 +168,6 @@ if(NOT benchmark_POPULATED)
 
   # Set custom variables, policies, etc.
   set(BENCHMARK_ENABLE_TESTING OFF)
-  set(CMAKE_BUILD_TYPE "Release")
   
   # Bring the populated content into the build
   add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
