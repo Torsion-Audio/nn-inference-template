@@ -1,4 +1,4 @@
-set(LIBONNXRUNTIME_VERSION 1.16.0)
+set(LIBONNXRUNTIME_VERSION 1.15.0)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION}/)
     message(STATUS "ONNX-Runtime library found at /modules/onnxruntime-${LIBONNXRUNTIME_VERSION}")
@@ -47,8 +47,11 @@ endif()
 option(ONNXRUNTIME_ROOTDIR "onnxruntime root dir")
 set(ONNXRUNTIME_ROOTDIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION})
 
-include_directories(
+include_directories(SYSTEM
         "${ONNXRUNTIME_ROOTDIR}/include"
         "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session"
 )
-link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
+
+link_directories(
+        "${ONNXRUNTIME_ROOTDIR}/lib"
+)
