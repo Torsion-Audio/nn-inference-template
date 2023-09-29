@@ -12,7 +12,7 @@ else()
     endif()
 
     if(UNIX AND NOT APPLE)
-        set(LIB_ONNXRUNTIME_PRE_BUILD_LIB_NAME "onnxruntime-linux-aarch64-${LIBONNXRUNTIME_VERSION}")
+        set(LIB_ONNXRUNTIME_PRE_BUILD_LIB_NAME "onnxruntime-linux-x64-${LIBONNXRUNTIME_VERSION}")
         set(LIB_ONNXRUNTIME_PRE_BUILD_LIB_TYPE "tgz")
     endif()
 
