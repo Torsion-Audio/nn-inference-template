@@ -143,7 +143,7 @@ target_link_libraries(${TARGET_NAME}
 enable_testing()
 
 # TODO start and stop executable test
-
+cmake_policy(SET CMP0135 NEW)
 # This module enables populating content at configure time via any method supported by the ExternalProject module. Whereas ExternalProject_Add() downloads at build time, the FetchContent module makes content available immediately, allowing the configure step to use the content in commands like add_subdirectory(), include() or file() operations.
 include(FetchContent)
 

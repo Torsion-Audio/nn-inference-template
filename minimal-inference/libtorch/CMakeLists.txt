@@ -10,3 +10,5 @@ add_executable(minimal-libtorch
 target_link_libraries(minimal-libtorch
   torch
 )
+
+target_compile_definitions(minimal-libtorch PUBLIC MODELS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../models")
