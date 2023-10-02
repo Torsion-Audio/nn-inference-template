@@ -16,11 +16,13 @@ int main(int argc, char* argv[]) {
     std::string filepath = MODELS_PATH;
     std::string modelpath = filepath + "/model-tensorflow2.onnx";
 
-    #ifdef _WIN32
-        Ort::Session session(env, modelpath, Ort::SessionOptions{ nullptr });
-    #else
-        Ort::Session session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr });
-    #endif
+#ifdef _WIN32
+    std::wstring modelWideStr = std::wstring(modelpath.begin(), modelpath.end());
+    const wchar_t* modelWideCStr = modelWideStr.c_str();
+    Ort::Session session(env, modelWideCStr, Ort::SessionOptions{nullptr });
+#else
+    Ort::Session session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr });
+#endif
 
     std::vector<float> input;
     for (int i = 0; i < 150; i++) {
