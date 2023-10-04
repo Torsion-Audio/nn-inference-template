@@ -14,6 +14,8 @@ set (PROJECT_NAME nn-inference-template)
 
 project (${PROJECT_NAME} VERSION 0.0.1)
 
+option(BUILD_ARCHITECTURE "Architecture to build for")
+
 # Sets the cpp language minimum
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -92,6 +94,13 @@ juce_generate_juce_header(${TARGET_NAME})
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)
 
+# For now remove unused dsp files
+file(GLOB_RECURSE SOURCES_DSP CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.h)
+foreach(SOURCE ${SOURCES_DSP})
+    list(REMOVE_ITEM SOURCES ${SOURCE})
+endforeach()
+
+
 # Add all sources to target
 target_sources(${TARGET_NAME} PRIVATE ${SOURCES})
 
@@ -168,6 +177,11 @@ if(NOT benchmark_POPULATED)
 
   # Set custom variables, policies, etc.
   set(BENCHMARK_ENABLE_TESTING OFF)
+
+  if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+    set(HAVE_STD_REGEX ON)
+    set(RUN_HAVE_STD_REGEX 1)
+  endif()
   
   # Bring the populated content into the build
   add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
@@ -202,5 +216,8 @@ target_include_directories(Test_${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${TARGE
 
 # include Loads and runs CMake code from the file given. Loads and runs CMake code from the file given.
 include(GoogleTest)
-# gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
-gtest_discover_tests(Test_${TARGET_NAME})
+
+if (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF)
+    # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
+    gtest_discover_tests(Test_${TARGET_NAME})
+endif ()

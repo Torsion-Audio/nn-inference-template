@@ -33,7 +33,6 @@ jobs:
     strategy:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: macOS-latest
             name: macOS-x86_64
@@ -88,7 +87,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@main
         with:
-          key: v3-${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          key: v3-${{ matrix.name }}-${{ env.BUILD_TYPE }}
           variant: ${{ matrix.ccache }}
       
       # Typical cmake configuration with default generator
@@ -97,9 +96,9 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="x86_64"
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="x86_64" -DBUILD_ARCHITECTURE="x86_64"
           elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
-            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="arm64"
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="arm64" -DBUILD_ARCHITECTURE="arm64"
           else
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
           fi;
@@ -111,6 +110,7 @@ jobs:
       
       # Test the project
       - name: ctest
+        if: ${{ matrix.name != 'macOS-arm64' }}
         working-directory: ${{github.workspace}}/build
         run: ctest --verbose
 
