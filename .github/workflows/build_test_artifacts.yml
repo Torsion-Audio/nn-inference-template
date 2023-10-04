@@ -36,7 +36,10 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         include:
           - os: macOS-latest
-            name: macOS
+            name: macOS-x86_64
+            ccache: ccache
+          - os: macOS-latest
+            name: macOS-arm64
             ccache: ccache
           - os: windows-latest
             name: Windows
@@ -64,7 +67,7 @@ jobs:
       - name: install deps
         shell: bash
         run: |
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             brew install osxutils
           elif [ "${{ matrix.name }}" == "Windows" ]; then
             choco install ccache
@@ -92,7 +95,14 @@ jobs:
       # With DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" we can build universal binaries for apple computers
       - name: cmake configure
         shell: bash
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+        run: |
+          if [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="x86_64"
+          elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="arm64"
+          else
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }}
+          fi;
 
       # Build the project
       - name: cmake build
@@ -117,7 +127,7 @@ jobs:
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
           mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
             mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
           elif [ "${{ matrix.name }}" == "Windows" ]; then
@@ -131,7 +141,7 @@ jobs:
       # We need to import the apple developer certificate so that we can codesign our binaries
       - name: import certificates (macOS)
         uses: apple-actions/import-codesign-certs@v2
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ matrix.os == 'macOS-latest' }}
         with:
           # GitHub encrypted secrets
           p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -139,7 +149,7 @@ jobs:
 
       # Codesigning all the binaries
       - name: codesign (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ matrix.os == 'macOS-latest' }}
         run: |
           codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
           codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component" --deep --strict --options=runtime --timestamp;
@@ -155,7 +165,7 @@ jobs:
         working-directory: ${{github.workspace}}/artefacts
         shell: bash
         run: |
-          if [ "${{ matrix.name }}" == "macOS" ]; then
+          if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
           elif [ "${{ matrix.name }}" == "Windows" ]; then
             tar -a -c -f ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/
@@ -168,7 +178,7 @@ jobs:
       # Let's now notarize the zip file and with it all its contents / binaries
       - name: notarize (macOS)
         working-directory: ${{github.workspace}}/artefacts
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ matrix.os == 'macOS-latest' }}
         run: |
           # In contrast to dmg files zip files do not need to be codesigned before notarization
           xcrun notarytool submit ${{ env.PRODUCT_NAME }}.zip --apple-id ${{ secrets.APPLE_DEV_ID }} --password ${{ secrets.APPLE_DEV_PWD }} --team-id ${{ secrets.TEAM_ID }} --wait
