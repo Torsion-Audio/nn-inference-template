@@ -32,7 +32,9 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 # Compilation options
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release")
+	message(FATAL_ERROR "No build type selected, please specify Debug or Release with -DCMAKE_BUILD_TYPE=<type>")
+else()
+	message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
 if(APPLE)
