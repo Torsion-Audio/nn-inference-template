@@ -37,10 +37,12 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if(APPLE)
-	set (FORMATS_TO_BUILD AU VST3 Standalone)
+if(APPLE AND (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF))
+	set(FORMATS_TO_BUILD AU VST3 Standalone)
+elseif(APPLE AND NOT BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
+    set(FORMATS_TO_BUILD AU Standalone)
 else()
-	set (FORMATS_TO_BUILD VST3 Standalone)
+	set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
 
 # Juce is included via a submodule
@@ -218,5 +220,5 @@ include(GoogleTest)
 
 if (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF)
     # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
-    gtest_discover_tests(Test_${TARGET_NAME} TEST_DISCOVERY_TIMEOUT 600)
+    gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 600)
 endif ()
