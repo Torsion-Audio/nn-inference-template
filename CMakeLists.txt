@@ -142,7 +142,6 @@ target_link_libraries(${TARGET_NAME}
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-
 # ==============================================================================
 
 # Test setup

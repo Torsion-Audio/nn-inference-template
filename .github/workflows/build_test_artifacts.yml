@@ -153,12 +153,16 @@ jobs:
       - name: codesign (macOS)
         if: ${{ matrix.os == 'macOS-latest' }}
         run: |
-          codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
+          if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
+            codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
+          fi;
           codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component" --deep --strict --options=runtime --timestamp;
           # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
           codesign --entitlements "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/JuceLibraryCode/${TARGET_NAME}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app" --deep --strict --options=runtime --timestamp;
           # Here we check the code signitures
-          codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3";
+          if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
+            codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3";
+          fi;
           codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component";
           codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app";
       
@@ -187,7 +191,9 @@ jobs:
           # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
           unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
           cd ${{ env.PRODUCT_NAME }}
-          xcrun stapler staple "${RELEASE_NAME}.vst3";
+          if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
+            xcrun stapler staple "${RELEASE_NAME}.vst3";
+          fi;
           xcrun stapler staple "${RELEASE_NAME}.component";
           xcrun stapler staple "${RELEASE_NAME}.app";
           cd ..
