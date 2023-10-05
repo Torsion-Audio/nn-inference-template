@@ -220,5 +220,5 @@ include(GoogleTest)
 
 if (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF)
     # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
-    gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 600)
+    gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 90)
 endif ()

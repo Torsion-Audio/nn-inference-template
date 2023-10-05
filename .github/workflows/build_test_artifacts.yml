@@ -126,7 +126,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
-          mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
+          if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
+            mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
+          fi;
           if [ "${{ matrix.os }}" == "macOS-latest" ]; then
             mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
             mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
