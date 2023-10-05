@@ -108,7 +108,6 @@ target_sources(${TARGET_NAME} PRIVATE ${SOURCES})
 file(GLOB_RECURSE SOURCE_DIRS LIST_DIRECTORIES true ${CMAKE_CURRENT_LIST_DIR}/source/*)
 list(APPEND SOURCE_DIRS ${CMAKE_CURRENT_LIST_DIR}/source)
 
-
 foreach (DIR ${SOURCE_DIRS})
     if (IS_DIRECTORY ${DIR})
         target_include_directories(${TARGET_NAME} PRIVATE ${DIR})
@@ -178,10 +177,10 @@ if(NOT benchmark_POPULATED)
   # Set custom variables, policies, etc.
   set(BENCHMARK_ENABLE_TESTING OFF)
 
-  if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
-    set(HAVE_STD_REGEX ON)
-    set(RUN_HAVE_STD_REGEX 1)
-  endif()
+#   if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+#     set(HAVE_STD_REGEX ON)
+#     set(RUN_HAVE_STD_REGEX 1)
+#   endif()
   
   # Bring the populated content into the build
   add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
