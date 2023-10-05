@@ -44,7 +44,6 @@ int main(int argc, char* argv[]) {
 
     // define shape
     std::array<int64_t, 3> inputShape = {1, 150, 1};
-    std::array<int64_t, 3> outputShape = {1, 1, 1};
 
     const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
                                                                     input.data(),

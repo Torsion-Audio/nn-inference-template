@@ -14,6 +14,8 @@ set (PROJECT_NAME nn-inference-template)
 
 project (${PROJECT_NAME} VERSION 0.0.1)
 
+option(BUILD_ARCHITECTURE "Architecture to build for")
+
 # Sets the cpp language minimum
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -37,10 +39,12 @@ else()
 	message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
-if(APPLE)
-	set (FORMATS_TO_BUILD AU VST3 Standalone)
+if(APPLE AND (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF))
+	set(FORMATS_TO_BUILD AU VST3 Standalone)
+elseif(APPLE AND NOT BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
+    set(FORMATS_TO_BUILD AU Standalone)
 else()
-	set (FORMATS_TO_BUILD VST3 Standalone)
+	set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
 
 # Juce is included via a submodule
@@ -94,13 +98,19 @@ juce_generate_juce_header(${TARGET_NAME})
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)
 
+# For now remove unused dsp files
+file(GLOB_RECURSE SOURCES_DSP CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.h)
+foreach(SOURCE ${SOURCES_DSP})
+    list(REMOVE_ITEM SOURCES ${SOURCE})
+endforeach()
+
+
 # Add all sources to target
 target_sources(${TARGET_NAME} PRIVATE ${SOURCES})
 
 # Add include directories for all folders in the source
 file(GLOB_RECURSE SOURCE_DIRS LIST_DIRECTORIES true ${CMAKE_CURRENT_LIST_DIR}/source/*)
 list(APPEND SOURCE_DIRS ${CMAKE_CURRENT_LIST_DIR}/source)
-
 
 foreach (DIR ${SOURCE_DIRS})
     if (IS_DIRECTORY ${DIR})
@@ -133,7 +143,6 @@ target_link_libraries(${TARGET_NAME}
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
-
 
 # ==============================================================================
 
@@ -170,6 +179,11 @@ if(NOT benchmark_POPULATED)
 
   # Set custom variables, policies, etc.
   set(BENCHMARK_ENABLE_TESTING OFF)
+
+  if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+    set(HAVE_STD_REGEX ON)
+    set(RUN_HAVE_STD_REGEX 1)
+  endif()
   
   # Bring the populated content into the build
   add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
@@ -204,5 +218,8 @@ target_include_directories(Test_${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${TARGE
 
 # include Loads and runs CMake code from the file given. Loads and runs CMake code from the file given.
 include(GoogleTest)
-# gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
-gtest_discover_tests(Test_${TARGET_NAME})
+
+if (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF)
+    # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
+    gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 90)
+endif ()
