@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 05.10.2023.
-//
-
 #include "WindowingProcessor.h"
 
 WindowingProcessor::WindowingProcessor(int inputSize) : modelInputSize(inputSize),

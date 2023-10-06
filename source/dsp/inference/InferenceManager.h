@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 29.09.2023.
-//
-
 #ifndef NN_INFERENCE_TEMPLATE_INFERENCEMANAGER_H
 #define NN_INFERENCE_TEMPLATE_INFERENCEMANAGER_H
 

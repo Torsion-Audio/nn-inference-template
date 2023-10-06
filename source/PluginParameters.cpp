@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 06.10.2023.
-//
-
 #include "PluginParameters.h"
 
 juce::AudioProcessorValueTreeState::ParameterLayout PluginParameters::createParameterLayout() {

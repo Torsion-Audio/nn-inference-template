@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 06.10.2023.
-//
-
 #ifndef NN_INFERENCE_TEMPLATE_PLUGINPARAMETERS_H
 #define NN_INFERENCE_TEMPLATE_PLUGINPARAMETERS_H
 

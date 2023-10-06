@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 29.09.2023.
-//
-
 #include "InferenceManager.h"
 
 InferenceManager::InferenceManager()
