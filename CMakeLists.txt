@@ -98,11 +98,11 @@ juce_generate_juce_header(${TARGET_NAME})
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)
 
-# For now remove unused dsp files
-file(GLOB_RECURSE SOURCES_DSP CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.h)
-foreach(SOURCE ${SOURCES_DSP})
-    list(REMOVE_ITEM SOURCES ${SOURCE})
-endforeach()
+## For now remove unused dsp files
+#file(GLOB_RECURSE SOURCES_DSP CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.h)
+#foreach(SOURCE ${SOURCES_DSP})
+#    list(REMOVE_ITEM SOURCES ${SOURCE})
+#endforeach()
 
 
 # Add all sources to target
