@@ -6,7 +6,11 @@
 
 InferenceManager::InferenceManager()
 {
+    inferenceThread.addInferenceListener(this);
+}
 
+InferenceManager::~InferenceManager() {
+    inferenceThread.removeInferenceListener(this);
 }
 
 void InferenceManager::parameterChanged(const juce::String &parameterID, float newValue) {

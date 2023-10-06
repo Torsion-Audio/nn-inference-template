@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "dsp/inference/InferenceManager.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor
@@ -43,6 +44,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+
+    InferenceManager inferenceManager;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 };

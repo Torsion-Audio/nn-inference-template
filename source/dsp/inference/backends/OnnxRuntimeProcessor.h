@@ -11,10 +11,9 @@
 
 class OnnxRuntimeProcessor {
 public:
-    OnnxRuntimeProcessor();
+    OnnxRuntimeProcessor(int inputSize);
     ~OnnxRuntimeProcessor();
 
-    void setModelInputSize(int size);
     void process(juce::AudioBuffer<float>& buffer);
 
 private:

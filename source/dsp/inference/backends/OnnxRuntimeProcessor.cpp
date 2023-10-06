@@ -4,18 +4,16 @@
 
 #include "OnnxRuntimeProcessor.h"
 
-OnnxRuntimeProcessor::OnnxRuntimeProcessor() : session(nullptr) {
+OnnxRuntimeProcessor::OnnxRuntimeProcessor(int inputSize) : session(nullptr),
+                                                            modelInputSize(inputSize)
+{
+    onnxInputData.resize(inputSize, 0.0f);
+    onnxOutputData.resize(inputSize, 0.0f);
     loadModel();
 }
 
 OnnxRuntimeProcessor::~OnnxRuntimeProcessor() {
     session.release();
-}
-
-void OnnxRuntimeProcessor::setModelInputSize(int size) {
-    modelInputSize = size;
-    onnxInputData.resize(size, 0.0f);
-    onnxOutputData.resize(size, 0.0f);
 }
 
 void OnnxRuntimeProcessor::loadModel() {
@@ -36,12 +34,12 @@ void OnnxRuntimeProcessor::process(juce::AudioBuffer<float> &buffer) {
 
     Ort::AllocatorWithDefaultOptions ort_alloc;
 
-    Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
-    Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
-    const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
-    const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
-
-    //process
+//    Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
+//    Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
+//    const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
+//    const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
+//
+//    //process
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 
     // define shape
@@ -60,16 +58,17 @@ void OnnxRuntimeProcessor::process(juce::AudioBuffer<float> &buffer) {
                                                                                      outputShape.data(),
                                                                                      outputShape.size()));
 
-    // run inference
-    try {
-        session.Run(runOptions, inputNames.data(), inputTensor.get(), 1, outputNames.data(), outputTensor.get(), 1);
-    } catch (Ort::Exception &e) {
-        std::cout << e.what() << std::endl;
-    }
+//    // run inference
+//    try {
+//        session.Run(runOptions, inputNames.data(), inputTensor.get(), 1, outputNames.data(), outputTensor.get(), 1);
+//    } catch (Ort::Exception &e) {
+//        std::cout << e.what() << std::endl;
+//    }
 
     auto writeOutput = buffer.getWritePointer(0);
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-        writeOutput[sample] = onnxOutputData[sample];
+//        writeOutput[sample] = onnxOutputData[sample];
+        writeOutput[sample] = onnxInputData[sample];
     }
 }
 
