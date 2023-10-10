@@ -11,4 +11,5 @@ target_link_libraries(minimal-onnxruntime
   onnxruntime
 )
 
-target_compile_definitions(minimal-onnxruntime PUBLIC MODELS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../models")
+target_compile_definitions(minimal-onnxruntime PUBLIC MODELS_PATH_TENSORFLOW="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
+target_compile_definitions(minimal-onnxruntime PUBLIC MODELS_PATH_PYTORCH="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/pytorch-version/models/")

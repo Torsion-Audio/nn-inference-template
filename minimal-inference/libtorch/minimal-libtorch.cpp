@@ -6,16 +6,16 @@ Licence: modified BSD
 ========================================================================== */
 
 #include <torch/script.h>
-
 #include <iostream>
 #include <memory>
 
 int main(int argc, const char* argv[]) {
 
-    std::string filepath = MODELS_PATH;
-    const std::string modelpath = filepath + "/model.pt";
+    std::string filepath = MODELS_PATH_PYTORCH;
+    const std::string modelpath = filepath + "model_0/model_0.pt";
 
-    torch::jit::script::Module module;
+    // Load model
+    torch::jit::Module module;
     try {
         module = torch::jit::load(modelpath);
     }
@@ -25,20 +25,31 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
+    // Fill input tensor with data
     const int inputSize = 150;
-    std::array<float, inputSize> inputData;
+    float inputData[inputSize];
     for (int i = 0; i < inputSize; i++) {
-        inputData[i] = i * 0.1f;
+        inputData[i] = i * 0.001f;
     }
 
-    at::Tensor frame = torch::from_blob(inputData.data(), {inputSize}).reshape({1, 1, inputSize});
+    // Create input tensor object from input data values and reshape
+    at::Tensor frame = torch::from_blob(&inputData, {inputSize}).reshape({1, 1, inputSize});
 
+    // Create IValue vector for input of interpreter
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(frame);
 
-    auto output = module.forward(inputs).toTensor();
+    // Execute inference
+    at::Tensor output = module.forward(inputs).toTensor();
 
-    std::cout << "Output: " << output.item().toFloat() << '\n';
+    // Extract the output tensor data
+    int outputSize = 1;
+    float outputData[outputSize];
+    outputData[0] = output.item().toFloat();
+
+    for (int i = 0; i < outputSize; i++) {
+        std::cout << "Output: " << outputData[i] << '\n';
+    }
 
     return 0;
 }

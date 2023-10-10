@@ -10,59 +10,138 @@ Licence: MIT
 
 int main(int argc, char* argv[]) {
 
-    // Load the model and create InferenceSession
-    Ort::Env env;
+    bool tflite = true;
+    bool libtorch = true;
 
-    std::string filepath = MODELS_PATH;
-    std::string modelpath = filepath + "/model-tensorflow2.onnx";
+    if (tflite) {
 
+        std::string filepath = MODELS_PATH_TENSORFLOW;
+        std::string modelpath = filepath + "model_0/model_0-tflite.onnx";
+
+        // Define environment that holds logging state used by all other objects.
+        // Note: One Env must be created before using any other Onnxruntime functionality.
+        Ort::Env env;
+        // Define memory info for input and output tensors for CPU usage
+        Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+        // Define allocator
+        Ort::AllocatorWithDefaultOptions ort_alloc;
+
+        // Load the model and create InferenceSession
 #ifdef _WIN32
-    std::wstring modelWideStr = std::wstring(modelpath.begin(), modelpath.end());
-    const wchar_t* modelWideCStr = modelWideStr.c_str();
-    Ort::Session session(env, modelWideCStr, Ort::SessionOptions{nullptr });
+        std::wstring modelWideStr = std::wstring(modelpath.begin(), modelpath.end());
+        const wchar_t* modelWideCStr = modelWideStr.c_str();
+        Ort::Session session(env, modelWideCStr, Ort::SessionOptions{nullptr });
 #else
-    Ort::Session session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr });
+        Ort::Session session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr });
 #endif
 
-    std::vector<float> input;
-    for (int i = 0; i < 150; i++) {
-        input.push_back(i*0.001f);
+        // Define input data
+        const int inputSize = 150;
+        float inputData[inputSize];
+        for (int i = 0; i < inputSize; i++) {
+            inputData[i] = i * 0.001f;
+        }
+
+        // Define the shape of input tensor
+        std::array<int64_t, 3> inputShape = {1, 150, 1};
+
+        // Create input tensor object from input data values and shape
+        const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
+                                                                        &inputData[0],
+                                                                        inputSize,
+                                                                        inputShape.data(),
+                                                                        inputShape.size());
+
+
+        // Get input and output names from model
+        Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
+        Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
+        const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
+        const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
+
+        try {
+            // Run inference
+            auto outputTensor = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
+
+            // Define output vector
+            int outputSize = 1;
+            float* outputData[outputSize];
+
+            // Extract the output tensor data
+            outputData[0] = outputTensor[0].GetTensorMutableData<float>();
+
+            for (int i = 0; i < outputSize; i++) {
+                std::cout << "Output of TensorFlow model: " << *outputData[i] << std::endl;    
+            }
+        }
+        catch (Ort::Exception &e) {
+            std::cout << e.what() << std::endl;
+        }
     }
 
-    std::vector<float> output;
-    output.resize(1);
+    if (libtorch) {
 
-    Ort::AllocatorWithDefaultOptions ort_alloc;
+        std::string filepath = MODELS_PATH_PYTORCH;
+        std::string modelpath = filepath + "model_0/model_0-libtorch.onnx";
 
-    Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
-    Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
-    const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
-    const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
+        // Define environment that holds logging state used by all other objects.
+        // Note: One Env must be created before using any other Onnxruntime functionality.
+        Ort::Env env;
+        // Define memory info for input and output tensors for CPU usage
+        Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+        // Define allocator
+        Ort::AllocatorWithDefaultOptions ort_alloc;
 
-    //process
-    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+        // Load the model and create InferenceSession
+#ifdef _WIN32
+        std::wstring modelWideStr = std::wstring(modelpath.begin(), modelpath.end());
+        const wchar_t* modelWideCStr = modelWideStr.c_str();
+        Ort::Session session(env, modelWideCStr, Ort::SessionOptions{nullptr });
+#else
+        Ort::Session session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr });
+#endif
 
-    // define shape
-    std::array<int64_t, 3> inputShape = {1, 150, 1};
+        // Define input data
+        const int inputSize = 150;
+        float inputData[inputSize];
+        for (int i = 0; i < inputSize; i++) {
+            inputData[i] = i * 0.001f;
+        }
 
-    const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
-                                                                    input.data(),
-                                                                    input.size(),
-                                                                    inputShape.data(),
-                                                                    inputShape.size());
+        // Define the shape of input tensor
+        std::array<int64_t, 3> inputShape = {1, 1, 150};
 
-    try {
-        auto outputTensor = session.Run(Ort::RunOptions{nullptr}, 
-        inputNames.data(), 
-        &inputTensor, 
-        inputNames.size(), 
-        outputNames.data(), 
-        outputNames.size());
-        output[0] = outputTensor[0].GetTensorMutableData<float>()[0];
-        std::cout << "Output: " << output[0] << std::endl;
-    } catch (Ort::Exception &e) {
-        std::cout << e.what() << std::endl;
+        // Create input tensor object from input data values and shape
+        const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
+                                                                        &inputData[0],
+                                                                        inputSize,
+                                                                        inputShape.data(),
+                                                                        inputShape.size());
+
+
+        // Get input and output names from model
+        Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
+        Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
+        const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
+        const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
+
+        try {
+            // Run inference
+            auto outputTensor = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
+
+            // Define output vector
+            int outputSize = 1;
+            float* outputData[outputSize];
+
+            // Extract the output tensor data
+            outputData[0] = outputTensor[0].GetTensorMutableData<float>();
+
+            for (int i = 0; i < outputSize; i++) {
+                std::cout << "Output of Pytorch model: " << *outputData[i] << std::endl;    
+            }
+        }
+        catch (Ort::Exception &e) {
+            std::cout << e.what() << std::endl;
+        }
     }
-
-    return 0;
 }
