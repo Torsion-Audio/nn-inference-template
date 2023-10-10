@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
-                                                                        &inputData[0],
+                                                                        inputData,
                                                                         inputSize,
                                                                         inputShape.data(),
                                                                         inputShape.size());
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
-                                                                        &inputData[0],
+                                                                        inputData,
                                                                         inputSize,
                                                                         inputShape.data(),
                                                                         inputShape.size());
