@@ -3,3 +3,4 @@ build/
 modules/
 cmake-build*
 .idea
+.vscode
