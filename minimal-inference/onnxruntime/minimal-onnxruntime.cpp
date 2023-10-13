@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Define the shape of input tensor
-        std::array<int64_t, 3> inputShape = {1, 150, 1};
+        std::array<int64_t, 3> inputShape = {1, inputSize, 1};
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
@@ -59,23 +59,26 @@ int main(int argc, char* argv[]) {
         const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
         const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
 
+        // Define output tensor vector
+        std::vector<Ort::Value> outputTensors;
+
         try {
             // Run inference
-            auto outputTensor = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
-
-            // Define output vector
-            int outputSize = 1;
-            float* outputData[outputSize];
-
-            // Extract the output tensor data
-            outputData[0] = outputTensor[0].GetTensorMutableData<float>();
-
-            for (int i = 0; i < outputSize; i++) {
-                std::cout << "Output of TensorFlow model: " << *outputData[i] << std::endl;    
-            }
+            outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
         }
         catch (Ort::Exception &e) {
             std::cout << e.what() << std::endl;
+        }
+        
+        // Define output vector
+        int outputSize = 1;
+        float* outputData[outputSize];
+
+        // Extract the output tensor data
+        outputData[0] = outputTensors[0].GetTensorMutableData<float>();
+
+        for (int i = 0; i < outputSize; i++) {
+            std::cout << "Output of TensorFlow model: " << *outputData[i] << std::endl;    
         }
     }
 
@@ -109,7 +112,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Define the shape of input tensor
-        std::array<int64_t, 3> inputShape = {1, 1, 150};
+        std::array<int64_t, 3> inputShape = {1, 1, inputSize};
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
@@ -125,23 +128,26 @@ int main(int argc, char* argv[]) {
         const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
         const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
 
+        // Define output tensor vector
+        std::vector<Ort::Value> outputTensors;
+
         try {
             // Run inference
-            auto outputTensor = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
-
-            // Define output vector
-            int outputSize = 1;
-            float* outputData[outputSize];
-
-            // Extract the output tensor data
-            outputData[0] = outputTensor[0].GetTensorMutableData<float>();
-
-            for (int i = 0; i < outputSize; i++) {
-                std::cout << "Output of Pytorch model: " << *outputData[i] << std::endl;    
-            }
+            outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
         }
         catch (Ort::Exception &e) {
             std::cout << e.what() << std::endl;
+        }
+        
+        // Define output vector
+        int outputSize = 1;
+        float* outputData[outputSize];
+
+        // Extract the output tensor data
+        outputData[0] = outputTensors[0].GetTensorMutableData<float>();
+
+        for (int i = 0; i < outputSize; i++) {
+            std::cout << "Output of PyTorch model: " << *outputData[i] << std::endl;    
         }
     }
 }
