@@ -1,9 +1,12 @@
 set(LIBONNXRUNTIME_VERSION 1.15.0)
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION}/)
-    message(STATUS "ONNX-Runtime library found at /modules/onnxruntime-${LIBONNXRUNTIME_VERSION}")
+option(ONNXRUNTIME_ROOTDIR "onnxruntime root dir")
+set(ONNXRUNTIME_ROOTDIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION})
+
+if(EXISTS ${ONNXRUNTIME_ROOTDIR}/)
+    message(STATUS "ONNX-Runtime library found at ${ONNXRUNTIME_ROOTDIR}")
 else()
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION}/)
+    file(MAKE_DIRECTORY ${ONNXRUNTIME_ROOTDIR}/)
     message(STATUS "ONNX-Runtime library not found - downloading pre-built library.")
 
     if(WIN32)
@@ -43,9 +46,6 @@ else()
         message(STATUS "Linking downloaded ONNX-Runtime pre-built library.")
     endif()
 endif()
-
-option(ONNXRUNTIME_ROOTDIR "onnxruntime root dir")
-set(ONNXRUNTIME_ROOTDIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/onnxruntime-${LIBONNXRUNTIME_VERSION})
 
 include_directories(SYSTEM
         "${ONNXRUNTIME_ROOTDIR}/include"

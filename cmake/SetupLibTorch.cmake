@@ -10,10 +10,13 @@ else()
     endif()
 endif()
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}${TORCH_BUILD_TYPE}/)
-    message(STATUS "Libtorch-Runtime library found at /modules/libtorch-${LIBTORCH_VERSION}${TORCH_BUILD_TYPE}")
+option(LIBTORCH_ROOTDIR "libtorch root dir")
+set(LIBTORCH_ROOTDIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}${TORCH_BUILD_TYPE}/)
+
+if(EXISTS ${LIBTORCH_ROOTDIR})
+    message(STATUS "Libtorch-Runtime library found at ${LIBTORCH_ROOTDIR}")
 else()
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}${TORCH_BUILD_TYPE}/)
+    file(MAKE_DIRECTORY ${LIBTORCH_ROOTDIR}/)
     message(STATUS "Libtorch library not found - downloading pre-built library.")
 
     if(WIN32)
@@ -93,6 +96,10 @@ if (MSVC)
     endif()
 endif (MSVC)
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules/libtorch-${LIBTORCH_VERSION}${TORCH_BUILD_TYPE}/")
+list(APPEND CMAKE_PREFIX_PATH ${LIBTORCH_ROOTDIR})
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+# Suppress warnings by setting -w flag as a linker option
+target_link_options(torch INTERFACE "-w")
+target_link_options(torch_library INTERFACE "-w")

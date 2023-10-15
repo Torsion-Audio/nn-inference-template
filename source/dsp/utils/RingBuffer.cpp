@@ -3,10 +3,10 @@
 RingBuffer::RingBuffer() = default;
 
 void RingBuffer::initialise(int numChannels, int numSamples) {
-    readPos.resize(numChannels);
-    writePos.resize(numChannels);
+    readPos.resize((size_t) numChannels);
+    writePos.resize((size_t) numChannels);
 
-    for (int i = 0; i < readPos.size(); i++) {
+    for (size_t i = 0; i < readPos.size(); i++) {
         readPos[i] = 0;
         writePos[i] = 0;
     }
@@ -16,29 +16,30 @@ void RingBuffer::initialise(int numChannels, int numSamples) {
 
 void RingBuffer::reset() {
     buffer.clear();
-    for (int i = 0; i < readPos.size(); i++) {
+
+    for (size_t i = 0; i < readPos.size(); i++) {
         readPos[i] = 0;
         writePos[i] = 0;
     }
 }
 
 void RingBuffer::pushSample(float sample, int channel) {
-    buffer.setSample(channel, writePos[channel], sample);
+    buffer.setSample(channel, writePos[(size_t) channel], sample);
 
-    ++writePos[channel];
+    ++writePos[(size_t) channel];
 
-    if (writePos[channel] >= buffer.getNumSamples()) {
-        writePos[channel] = 0;
+    if (writePos[(size_t) channel] >= buffer.getNumSamples()) {
+        writePos[(size_t) channel] = 0;
     }
 }
 
 float RingBuffer::popSample(int channel) {
-    auto sample = buffer.getSample(channel, readPos[channel]);
+    auto sample = buffer.getSample(channel, readPos[(size_t) channel]);
 
-    ++readPos[channel];
+    ++readPos[(size_t) channel];
 
-    if (readPos[channel] >= buffer.getNumSamples()) {
-        readPos[channel] = 0;
+    if (readPos[(size_t) channel] >= buffer.getNumSamples()) {
+        readPos[(size_t) channel] = 0;
     }
     return sample;
 }
@@ -46,10 +47,10 @@ float RingBuffer::popSample(int channel) {
 int RingBuffer::getAvailableSamples(int channel) {
     int returnValue;
 
-    if (readPos[channel] <= writePos[channel]) {
-        returnValue = writePos[channel] - readPos[channel];
+    if (readPos[(size_t) channel] <= writePos[(size_t) channel]) {
+        returnValue = writePos[(size_t) channel] - readPos[(size_t) channel];
     } else {
-        returnValue = writePos[channel] + buffer.getNumSamples() - readPos[channel];
+        returnValue = writePos[(size_t) channel] + buffer.getNumSamples() - readPos[(size_t) channel];
     }
 
     return returnValue;

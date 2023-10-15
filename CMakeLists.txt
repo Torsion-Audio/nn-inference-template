@@ -154,17 +154,20 @@ target_link_libraries(${TARGET_NAME}
 enable_testing()
 
 # TODO start and stop executable test
-cmake_policy(SET CMP0135 NEW)
 # This module enables populating content at configure time via any method supported by the ExternalProject module. Whereas ExternalProject_Add() downloads at build time, the FetchContent module makes content available immediately, allowing the configure step to use the content in commands like add_subdirectory(), include() or file() operations.
 include(FetchContent)
 
 # Externally provided libraries
-# Using zip files instead is faster
 FetchContent_Declare(googletest
-	URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip)
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_PROGRESS TRUE
+    GIT_SHALLOW TRUE
+    GIT_TAG v1.14.0)
 
 FetchContent_Declare(benchmark
     GIT_REPOSITORY https://github.com/google/benchmark.git
+    GIT_PROGRESS TRUE
+    GIT_SHALLOW TRUE
     GIT_TAG v1.8.3)
 
 # This command ensures that each of the named dependencies are made available to the project by the time it returns. If the dependency has already been populated the command does nothing. Otherwise, the command populates the dependency and then calls add_subdirectory() on the result.
@@ -174,19 +177,23 @@ FetchContent_MakeAvailable(googletest)
 # Check if population has already been performed
 FetchContent_GetProperties(benchmark)
 if(NOT benchmark_POPULATED)
-  # Fetch the content using previously declared details
-  FetchContent_Populate(benchmark)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(benchmark)
 
-  # Set custom variables, policies, etc.
-  set(BENCHMARK_ENABLE_TESTING OFF)
+    # Set custom variables, policies, etc.
+    set(BENCHMARK_ENABLE_TESTING OFF)
 
-  if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+    if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
     set(HAVE_STD_REGEX ON)
     set(RUN_HAVE_STD_REGEX 1)
-  endif()
-  
-  # Bring the populated content into the build
-  add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
+    endif()
+
+    # Bring the populated content into the build
+    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
+
+    # Supress warnings by making include directories system directories
+    get_property(BENCHMARK_INCLUDE_DIRS TARGET benchmark PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    target_include_directories(benchmark SYSTEM INTERFACE ${BENCHMARK_INCLUDE_DIRS})
 endif()
 
 # get all test cpp and header files
@@ -207,14 +214,15 @@ foreach (DIR ${TEST_DIRS}_${TARGET_NAME})
 endforeach ()
 
 # Link the test executable against gtest_main and google benchmark
-target_link_libraries(Test_${TARGET_NAME} PRIVATE gtest_main benchmark::benchmark)
+target_link_libraries(Test_${TARGET_NAME} PRIVATE gtest_main benchmark)
 
 # We can't link again to the shared juce target without ODL violations (https://github.com/sudara/pamplejuce/issues/31, https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2)
 # Therefore we steal the compile definitions and include directories from the main target and pass them to our test target
 # Since we linked the shared juce targets in PRIVATE mode, they are not linked to the test target again
 target_link_libraries(Test_${TARGET_NAME} PRIVATE ${TARGET_NAME})
 target_compile_definitions(Test_${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${TARGET_NAME},COMPILE_DEFINITIONS>)
-target_include_directories(Test_${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${TARGET_NAME},INCLUDE_DIRECTORIES>)
+# Use SYSTEM to suppress warnings
+target_include_directories(Test_${TARGET_NAME} SYSTEM PRIVATE $<TARGET_PROPERTY:${TARGET_NAME},INCLUDE_DIRECTORIES>)
 
 # include Loads and runs CMake code from the file given. Loads and runs CMake code from the file given.
 include(GoogleTest)

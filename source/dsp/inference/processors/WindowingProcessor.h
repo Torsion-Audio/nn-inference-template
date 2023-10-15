@@ -14,10 +14,10 @@ public:
     WindowingProcessor(int inputSize);
     ~WindowingProcessor() = default;
 
-    void prepare(const juce::dsp::ProcessSpec& spec);;
+    void prepare(const juce::dsp::ProcessSpec& spec);
 
-    void processPreBlock(RingBuffer& readRingBuffer, juce::AudioBuffer<float>& writeBuffer);;
-    void processPostBlock(juce::AudioBuffer<float>& readBuffer, juce::AudioBuffer<float>& writeBuffer);;
+    void processPreBlock(RingBuffer& readRingBuffer, juce::AudioBuffer<float>& writeBuffer);
+    void processPostBlock(juce::AudioBuffer<float>& readBuffer, juce::AudioBuffer<float>& writeBuffer);
 
     int getNumberOfNeededSamples();
 
