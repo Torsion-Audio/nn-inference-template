@@ -10,5 +10,3 @@ add_executable(minimal-tflite
 target_link_libraries(minimal-tflite
   tensorflowlite_c
 )
-
-target_compile_definitions(minimal-tflite PUBLIC MODELS_PATH_TENSORFLOW="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
