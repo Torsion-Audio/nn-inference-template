@@ -11,7 +11,7 @@ public:
     InferenceManager();
     ~InferenceManager() override;
 
-    void prepare(const juce::dsp::ProcessSpec& spec);
+    void prepareToPlay(const juce::dsp::ProcessSpec& spec);
     void processBlock(juce::AudioBuffer<float>& buffer);
 
     void parameterChanged(const juce::String &parameterID, float newValue);
@@ -21,11 +21,19 @@ public:
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);
     void calculateLatency(int maxSamplesPerBuffer);
-    void inferenceThreadFinished(juce::AudioBuffer<float>& buffer) override;
+    void inferenceThreadFinished() override;
 
 private:
+    bool init = true;
+    int init_samples = 0;
+
     InferenceThread inferenceThread;
+    RingBuffer sendRingBuffer;
+    juce::AudioBuffer<float> sendBuffer;
     RingBuffer receiveRingBuffer;
+    juce::AudioBuffer<float> receiveBuffer;
+
+    int numInferencedBufferAvailable;
 
     int latencyInSamples = 0;
     int inferenceCounter = 0;

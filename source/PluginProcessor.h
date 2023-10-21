@@ -44,7 +44,6 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
-
     InferenceManager inferenceManager;
 
     //==============================================================================

@@ -7,23 +7,36 @@
 
 class OnnxRuntimeProcessor {
 public:
-    OnnxRuntimeProcessor(int inputSize);
+    OnnxRuntimeProcessor();
     ~OnnxRuntimeProcessor();
 
-    void process(juce::AudioBuffer<float>& buffer);
+    void prepareToPlay(float * modelInputBuffer);
+    float* processBlock();
 
 private:
-    void loadModel();
+    std::string filepath = MODELS_PATH_TENSORFLOW;
+    std::string modelname = "model_0/model_0-tflite.onnx";
+#ifdef _WIN32
+    std::string modelpathStr = filepath + modelname;
+    std::wstring modelpath = std::wstring(modelpathStr.begin(), modelpathStr.end());
+#else
+    std::string modelpath = filepath + modelname;
+#endif
 
     Ort::Env env;
-    Ort::RunOptions runOptions;
+    Ort::MemoryInfo memory_info;
+    Ort::AllocatorWithDefaultOptions ort_alloc;
     Ort::Session session;
 
-    int modelInputSize = MODEL_INPUT_SIZE;
+    size_t inputSize;
+    std::array<int64_t, 3> inputShape;
+    std::array<const char *, 1> inputNames;
 
-    std::vector<float> onnxInputData;
-    std::vector<float> onnxOutputData;
+    std::array<const char *, 1> outputNames;
+    // Define output tensor vector
+    std::vector<Ort::Value> outputTensors;
+
+    float * modelInputBuffer;
 };
-
 
 #endif //NN_INFERENCE_TEMPLATE_ONNXRUNTIMEPROCESSOR_H

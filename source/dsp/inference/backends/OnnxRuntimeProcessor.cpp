@@ -1,71 +1,49 @@
 #include "OnnxRuntimeProcessor.h"
 
-OnnxRuntimeProcessor::OnnxRuntimeProcessor(int inputSize) : session(nullptr),
-                                                            modelInputSize(inputSize)
-{
-    onnxInputData.resize(inputSize, 0.0f);
-    onnxOutputData.resize(inputSize, 0.0f);
-    loadModel();
+OnnxRuntimeProcessor::OnnxRuntimeProcessor() : memory_info(Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU)), session(env, modelpath.c_str(), Ort::SessionOptions{ nullptr }) {
 }
 
 OnnxRuntimeProcessor::~OnnxRuntimeProcessor() {
-    session.release();
 }
 
-void OnnxRuntimeProcessor::loadModel() {
-    Ort::SessionOptions sessionOptions;
+void OnnxRuntimeProcessor::prepareToPlay(float * newModelInputBuffer) {
+    modelInputBuffer = newModelInputBuffer;
 
-//    session = Ort::Session(env,
-//                           BinaryData::model_onnx,
-//                           BinaryData::model_onnxSize,
-//                           sessionOptions);
+    inputSize = MODEL_INPUT_SIZE;
+    // Define the shape of input tensor
+    inputShape = {1, MODEL_INPUT_SIZE, 1};
 }
 
-void OnnxRuntimeProcessor::process(juce::AudioBuffer<float> &buffer) {
+float* OnnxRuntimeProcessor::processBlock() {
 
-    auto readInput = buffer.getReadPointer(0);
-    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-        onnxInputData[sample] = readInput[sample];
+    // Create input tensor object from input data values and shape
+    const Ort::Value inputTensor = Ort::Value::CreateTensor<float> (memory_info,
+                                                                    modelInputBuffer,
+                                                                    MODEL_INPUT_SIZE,
+                                                                    inputShape.data(),
+                                                                    inputShape.size());
+
+    // Get input and output names from model
+    Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
+    Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
+    inputNames = {(char*) inputName.get()};
+    outputNames = {(char*) outputName.get()};
+
+    try {
+        // Run inference
+        outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor, inputNames.size(), outputNames.data(), outputNames.size());
     }
-
-    Ort::AllocatorWithDefaultOptions ort_alloc;
-
-//    Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
-//    Ort::AllocatedStringPtr outputName = session.GetOutputNameAllocated(0, ort_alloc);
-//    const std::array<const char *, 1> inputNames = {(char*) inputName.get()};
-//    const std::array<const char *, 1> outputNames = {(char*) outputName.get()};
-//
-//    //process
-    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-
-    // define shape
-    std::array<int64_t, 3> inputShape = {1, 1, modelInputSize};
-    std::array<int64_t, 3> outputShape = {1, 1, modelInputSize};
-
-    auto inputTensor = std::make_shared<Ort::Value>(Ort::Value::CreateTensor<float>(memory_info,
-                                                                                    onnxInputData.data(),
-                                                                                    modelInputSize,
-                                                                                    inputShape.data(),
-                                                                                    inputShape.size()));
-
-    auto outputTensor = std::make_shared<Ort::Value>(Ort::Value::CreateTensor<float>(memory_info,
-                                                                                     onnxOutputData.data(),
-                                                                                     modelInputSize,
-                                                                                     outputShape.data(),
-                                                                                     outputShape.size()));
-
-//    // run inference
-//    try {
-//        session.Run(runOptions, inputNames.data(), inputTensor.get(), 1, outputNames.data(), outputTensor.get(), 1);
-//    } catch (Ort::Exception &e) {
-//        std::cout << e.what() << std::endl;
-//    }
-
-    auto writeOutput = buffer.getWritePointer(0);
-    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-//        writeOutput[sample] = onnxOutputData[sample];
-        writeOutput[sample] = onnxInputData[sample];
+    catch (Ort::Exception &e) {
+        std::cout << e.what() << std::endl;
     }
+    
+    float* outputData[MODEL_OUTPUT_SIZE];
+
+    // Extract the output tensor data
+    outputData[0] = outputTensors[0].GetTensorMutableData<float>();
+
+    for (size_t i = 0; i < MODEL_OUTPUT_SIZE; i++) {
+        std::cout << "Output of TensorFlow model: " << *outputData[i] << std::endl;
+    }
+    return nullptr;
 }
-
-

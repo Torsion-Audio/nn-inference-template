@@ -5,9 +5,9 @@
 
 #include "../utils/RingBuffer.h"
 #include "utils/InferenceConfig.h"
-#include "processors/WindowingProcessor.h"
-#include "backends/LibtorchProcessor.h"
 #include "backends/OnnxRuntimeProcessor.h"
+// #include "backends/LibtorchProcessor.h"
+// #include "processors/WindowingProcessor.h"
 
 class InferenceThread : public juce::Thread {
 public:
@@ -17,45 +17,30 @@ public:
     class Listener {
     public:
         virtual ~Listener() = default;
-        virtual void inferenceThreadFinished(juce::AudioBuffer<float>& buffer) {juce::ignoreUnused(buffer);}
+        virtual void inferenceThreadFinished() = 0;
     };
     void addInferenceListener(Listener* listenerToAdd) {listeners.add(listenerToAdd);}
     void removeInferenceListener(Listener* listenerToRemove) {listeners.remove(listenerToRemove);}
 
-    void prepare(const juce::dsp::ProcessSpec& spec);
-
-    void sendAudio(juce::AudioBuffer<float>& buffer);
-    std::function<int(juce::AudioBuffer<float> buffer, int numOfSamples)> onNewProcessedBuffer;
-
+    void prepareToPlay(float * modelInputBuffer, float * modelOutputBuffer);
     void setBackend(InferenceBackend backend);
-    void enableWindowing(bool enabled);
 
-    int getLatency() const;
-
-public:
-    bool init = true;
-    int init_samples = 0;
+    void startInference();
 
 private:
     void run() override;
-    void runAudioProcessing();
+    void forwardBuffer();
 
 private:
-    int maxModelCalcSize = MODEL_INPUT_SIZE;
-    int modelInputSize = MODEL_INPUT_SIZE;
     std::atomic<float> processingTime;
 
-    RingBuffer receiveRingBuffer;
-    juce::AudioBuffer<float> modelInputBuffer;
-    juce::AudioBuffer<float> processedBuffer;
-
-    WindowingType windowingType = Hanning;
-    WindowingProcessor windowingProcessor;
-
     OnnxRuntimeProcessor onnxProcessor;
-    LibtorchProcessor torchProcessor;
+    // LibtorchProcessor torchProcessor;
 
-    std::atomic<InferenceBackend> currentBackend {LIBTORCH};
+    float * modelInputBuffer;
+    float * modelOutputBuffer;
+
+    std::atomic<InferenceBackend> currentBackend {ONNX};
 
     juce::ListenerList<Listener> listeners;
 };
