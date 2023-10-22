@@ -22,14 +22,15 @@ public:
     void addInferenceListener(Listener* listenerToAdd) {listeners.add(listenerToAdd);}
     void removeInferenceListener(Listener* listenerToRemove) {listeners.remove(listenerToRemove);}
 
-    void prepareToPlay(float * modelInputBuffer, float * modelOutputBuffer);
+    void prepareToPlay();
     void setBackend(InferenceBackend backend);
-
-    void startInference();
+    std::array<float, MODEL_INPUT_SIZE>& getModelInputBuffer();
+    std::array<float, MODEL_INPUT_SIZE>& getModelOutputBuffer();
 
 private:
     void run() override;
-    void forwardBuffer();
+    void inference();
+    void processModel();
 
 private:
     std::atomic<float> processingTime;
@@ -37,8 +38,11 @@ private:
     OnnxRuntimeProcessor onnxProcessor;
     // LibtorchProcessor torchProcessor;
 
-    float * modelInputBuffer;
-    float * modelOutputBuffer;
+
+    std::array<float, MODEL_INPUT_SIZE> rawModelInputBuffer;
+    std::array<float, MODEL_OUTPUT_SIZE> rawModelOutputBuffer;
+    std::array<float, MODEL_INPUT_SIZE> processedModelInput;
+    std::array<float, MODEL_INPUT_SIZE> processedModelOutput;
 
     std::atomic<InferenceBackend> currentBackend {ONNX};
 

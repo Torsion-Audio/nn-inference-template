@@ -8,7 +8,7 @@ enum InferenceBackend {
 };
 
 #define MODEL_INPUT_SIZE 150
-#define MAX_INFERENCE_TIME 1024
+#define MAX_INFERENCE_TIME 4096
 #define MODEL_LATENCY 0
 
 #define MODEL_OUTPUT_SIZE 1

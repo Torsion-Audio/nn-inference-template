@@ -29,11 +29,9 @@ private:
 
     InferenceThread inferenceThread;
     RingBuffer sendRingBuffer;
-    juce::AudioBuffer<float> sendBuffer;
     RingBuffer receiveRingBuffer;
-    juce::AudioBuffer<float> receiveBuffer;
 
-    int numInferencedBufferAvailable;
+    std::atomic<int> numInferencedBufferAvailable;
 
     int latencyInSamples = 0;
     int inferenceCounter = 0;

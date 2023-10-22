@@ -7,38 +7,62 @@ InferenceThread::~InferenceThread() {
     stopThread(100);
 }
 
-void InferenceThread::prepareToPlay(float * newModelInputBuffer, float * newModelOutputBuffer) {
-    modelInputBuffer = newModelInputBuffer;
-    modelOutputBuffer = newModelOutputBuffer;
-
-    onnxProcessor.prepareToPlay(modelInputBuffer);
-    for (int i = 0; i < 150; i++) {
-        std::cout << modelInputBuffer[i] << std::endl;
+void InferenceThread::prepareToPlay() {
+    for (size_t i = 0; i < MODEL_INPUT_SIZE; i++) {
+        processedModelInput[i] = 0.f;
+        rawModelInputBuffer[i] = 0.f;
+        processedModelOutput[i] = 0.f;
     }
-}
+    for (size_t i = 0; i < MODEL_OUTPUT_SIZE; i++) {
+        rawModelOutputBuffer[i] = 0.f;
+    }
 
-void InferenceThread::startInference() {
-    startThread(juce::Thread::Priority::highest);
+    onnxProcessor.prepareToPlay();
 }
 
 void InferenceThread::run() {
     auto start = std::chrono::high_resolution_clock::now();
-    forwardBuffer();
+    inference();
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     processingTime.store(duration.count());
-}
-
-void InferenceThread::forwardBuffer() {
-    if (currentBackend == LIBTORCH) {
-        // modelOutputBuffer = torchProcessor.process(modelInputBuffer);
-    } else if (currentBackend == ONNX) {
-       auto rawModelOutput = onnxProcessor.processBlock();
-    }
 
     listeners.call(&Listener::inferenceThreadFinished);
+}
+
+void InferenceThread::inference() {
+
+    for (size_t i = 0; i < MODEL_INPUT_SIZE; i++) {
+        // pre-processing
+        for (size_t j = 1; j < MODEL_INPUT_SIZE; j++) {
+            processedModelInput[j-1] = processedModelInput[j];
+        }
+        processedModelInput[MODEL_INPUT_SIZE-1] = rawModelInputBuffer[i];
+
+        // actual inference
+        processModel();
+
+        // post-processing
+        processedModelOutput[i] = rawModelOutputBuffer[0];
+    }
+}
+
+void InferenceThread::processModel() {
+        if (currentBackend == LIBTORCH) {
+        // processedModelOutputBuffer = torchProcessor.process(rawModelInputBuffer);
+        } else if (currentBackend == ONNX) {
+            onnxProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
+        }
+}
+
+std::array<float, MODEL_INPUT_SIZE>& InferenceThread::getModelInputBuffer() {
+    return rawModelInputBuffer;
+}
+
+std::array<float, MODEL_INPUT_SIZE>& InferenceThread::getModelOutputBuffer() {
+    return processedModelOutput;
 }
 
 void InferenceThread::setBackend(InferenceBackend backend) {

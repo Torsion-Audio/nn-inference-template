@@ -16,19 +16,16 @@ void InferenceManager::parameterChanged(const juce::String &parameterID, float n
 }
 
 void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
-    numInferencedBufferAvailable = 0;
+    numInferencedBufferAvailable.store(0);
 
-    sendRingBuffer.initialise(1, (int) spec.sampleRate * 6);
+    sendRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
     receiveRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
-    sendBuffer.setSize(1, MODEL_INPUT_SIZE);
-    sendBuffer.clear();
-    receiveBuffer.setSize(1, MODEL_INPUT_SIZE);
-    receiveBuffer.clear();
 
-    inferenceThread.prepareToPlay((float *) sendBuffer.getReadPointer(0), (float *) receiveBuffer.getWritePointer(0));
-    numInferencedBufferAvailable = 0;
+    inferenceThread.prepareToPlay();
     inferenceCounter = 0;
 
+    init = true;
+    init_samples = 0;
     calculateLatency((int) spec.maximumBlockSize);
 }
 
@@ -40,18 +37,22 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
-    if (sendRingBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) {
-        if (!inferenceThread.isThreadRunning()) {
-            while (numInferencedBufferAvailable > 0) {
-                for (int sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
-                    receiveRingBuffer.pushSample(receiveBuffer.getSample(0, sample), 0);
-                }
-                numInferencedBufferAvailable--;
+    if (!inferenceThread.isThreadRunning()) {
+        auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
+        while (numInferencedBufferAvailable.load() > 0) {
+            for (size_t sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
+                receiveRingBuffer.pushSample(receiveBuffer[sample], 0);
             }
-            for (int sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
-                sendBuffer.setSample(0, sample, sendRingBuffer.popSample(0));
+            numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() - 1);
+        }
+        auto &sendBuffer = inferenceThread.getModelInputBuffer();
+        if (sendRingBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) { // TODO: refine this dynamic modelinputsize
+            for (size_t sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
+                sendBuffer[sample] = sendRingBuffer.popSample(0);
             }
-            inferenceThread.startInference();
+            if (!inferenceThread.startThread(juce::Thread::Priority::highest)) {
+                std::cout << "Inference thread could not be started" << std::endl;
+            }
         }
     }
     processOutput(buffer);
@@ -94,5 +95,5 @@ int InferenceManager::getLatency() const {
 }
 
 void InferenceManager::inferenceThreadFinished() {
-    numInferencedBufferAvailable++;
+    numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() + 1);
 }

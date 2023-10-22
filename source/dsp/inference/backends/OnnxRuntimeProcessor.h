@@ -10,8 +10,8 @@ public:
     OnnxRuntimeProcessor();
     ~OnnxRuntimeProcessor();
 
-    void prepareToPlay(float * modelInputBuffer);
-    float* processBlock();
+    void prepareToPlay();
+    void processBlock(std::array<float, MODEL_INPUT_SIZE>& input, std::array<float, MODEL_OUTPUT_SIZE>& output);
 
 private:
     std::string filepath = MODELS_PATH_TENSORFLOW;
@@ -28,15 +28,12 @@ private:
     Ort::AllocatorWithDefaultOptions ort_alloc;
     Ort::Session session;
 
-    size_t inputSize;
     std::array<int64_t, 3> inputShape;
     std::array<const char *, 1> inputNames;
 
     std::array<const char *, 1> outputNames;
     // Define output tensor vector
     std::vector<Ort::Value> outputTensors;
-
-    float * modelInputBuffer;
 };
 
 #endif //NN_INFERENCE_TEMPLATE_ONNXRUNTIMEPROCESSOR_H
