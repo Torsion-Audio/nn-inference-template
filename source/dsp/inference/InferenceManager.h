@@ -6,10 +6,11 @@
 #include "InferenceThread.h"
 #include "../utils/RingBuffer.h"
 
-class InferenceManager : private InferenceThread::Listener {
+// class InferenceManager : private InferenceThread::Listener {
+class InferenceManager {
 public:
     InferenceManager();
-    ~InferenceManager() override;
+    ~InferenceManager();
 
     void prepareToPlay(const juce::dsp::ProcessSpec& spec);
     void processBlock(juce::AudioBuffer<float>& buffer);
@@ -21,7 +22,7 @@ public:
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);
     void calculateLatency(int maxSamplesPerBuffer);
-    void inferenceThreadFinished() override;
+    // void inferenceThreadFinished() override;
 
 private:
     bool init = true;
@@ -32,6 +33,7 @@ private:
     RingBuffer receiveRingBuffer;
 
     std::atomic<int> numInferencedBufferAvailable;
+    juce::dsp::ProcessSpec spec;
 
     int latencyInSamples = 0;
     int inferenceCounter = 0;

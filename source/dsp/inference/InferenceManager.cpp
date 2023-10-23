@@ -1,11 +1,11 @@
 #include "InferenceManager.h"
 
 InferenceManager::InferenceManager() {
-    inferenceThread.addInferenceListener(this);
+    // inferenceThread.addInferenceListener(this);
 }
 
 InferenceManager::~InferenceManager() {
-    inferenceThread.removeInferenceListener(this);
+    // inferenceThread.removeInferenceListener(this);
 }
 
 void InferenceManager::parameterChanged(const juce::String &parameterID, float newValue) {
@@ -15,13 +15,14 @@ void InferenceManager::parameterChanged(const juce::String &parameterID, float n
     }
 }
 
-void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
+void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
+    spec = const_cast<juce::dsp::ProcessSpec &>(newSpec);
     numInferencedBufferAvailable.store(0);
 
     sendRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
     receiveRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
 
-    inferenceThread.prepareToPlay();
+    inferenceThread.prepareToPlay(spec);
     inferenceCounter = 0;
 
     init = true;
@@ -32,23 +33,20 @@ void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
 void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     if (init) {
         init_samples += buffer.getNumSamples();
-        if (init && init_samples >= MODEL_INPUT_SIZE + MAX_INFERENCE_TIME + MODEL_LATENCY) init = false;
+        if (init && init_samples >= MODEL_INPUT_SIZE + (int) spec.maximumBlockSize + MAX_INFERENCE_TIME + MODEL_LATENCY) init = false;
     }
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
-    if (!inferenceThread.isThreadRunning()) {
+    if (!inferenceThread.isThreadRunning()) { // TODO fix if Thread runs to long because of multiple iterations
         auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
-        while (numInferencedBufferAvailable.load() > 0) {
-            for (size_t sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
-                receiveRingBuffer.pushSample(receiveBuffer[sample], 0);
-            }
-            numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() - 1);
+        while (receiveBuffer.getAvailableSamples(0) > 0) {
+            receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
         }
         auto &sendBuffer = inferenceThread.getModelInputBuffer();
-        if (sendRingBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) { // TODO: refine this dynamic modelinputsize
-            for (size_t sample = 0; sample < MODEL_INPUT_SIZE; ++sample) {
-                sendBuffer[sample] = sendRingBuffer.popSample(0);
+        if (sendRingBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) {
+            while (sendRingBuffer.getAvailableSamples(0) > 0) {
+                sendBuffer.pushSample(sendRingBuffer.popSample(0), 0);
             }
             if (!inferenceThread.startThread(juce::Thread::Priority::highest)) {
                 std::cout << "Inference thread could not be started" << std::endl;
@@ -87,13 +85,13 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
 }
 
 void InferenceManager::calculateLatency(int maxSamplesPerBuffer) {
-    latencyInSamples = MODEL_INPUT_SIZE + MAX_INFERENCE_TIME + MODEL_LATENCY - maxSamplesPerBuffer;
+    // latencyInSamples = MODEL_INPUT_SIZE + MAX_INFERENCE_TIME + MODEL_LATENCY - maxSamplesPerBuffer;
 }
 
 int InferenceManager::getLatency() const {
     return latencyInSamples;
 }
 
-void InferenceManager::inferenceThreadFinished() {
-    numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() + 1);
-}
+// void InferenceManager::inferenceThreadFinished() {
+//     numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() + 1);
+// }

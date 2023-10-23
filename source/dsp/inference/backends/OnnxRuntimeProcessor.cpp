@@ -11,10 +11,10 @@ OnnxRuntimeProcessor::~OnnxRuntimeProcessor()
 
 void OnnxRuntimeProcessor::prepareToPlay() {
     // Define the shape of input tensor
-    inputShape = {1, MODEL_INPUT_SIZE, 1};
+    inputShape = {1, MODEL_INPUT_SIZE_BACKEND, 1};
 }
 
-void OnnxRuntimeProcessor::processBlock(std::array<float, MODEL_INPUT_SIZE>& input, std::array<float, MODEL_OUTPUT_SIZE>& output) {
+void OnnxRuntimeProcessor::processBlock(std::array<float, MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, MODEL_OUTPUT_SIZE_BACKEND>& output) {
 
     // Create input tensor object from input data values and shape
     const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
@@ -39,7 +39,7 @@ void OnnxRuntimeProcessor::processBlock(std::array<float, MODEL_INPUT_SIZE>& inp
     }
 
     // Extract the output tensor dat
-    for (size_t i = 0; i < MODEL_OUTPUT_SIZE; i++) {
+    for (size_t i = 0; i < MODEL_OUTPUT_SIZE_BACKEND; i++) {
         output[i] = outputTensors[0].GetTensorMutableData<float>()[i];
     }
 }

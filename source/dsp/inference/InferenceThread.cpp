@@ -7,15 +7,16 @@ InferenceThread::~InferenceThread() {
     stopThread(100);
 }
 
-void InferenceThread::prepareToPlay() {
-    for (size_t i = 0; i < MODEL_INPUT_SIZE; i++) {
+void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
+    for (size_t i = 0; i < MODEL_INPUT_SIZE_BACKEND; i++) {
         processedModelInput[i] = 0.f;
-        rawModelInputBuffer[i] = 0.f;
-        processedModelOutput[i] = 0.f;
     }
-    for (size_t i = 0; i < MODEL_OUTPUT_SIZE; i++) {
+    for (size_t i = 0; i < MODEL_OUTPUT_SIZE_BACKEND; i++) {
         rawModelOutputBuffer[i] = 0.f;
     }
+
+    rawModelInput.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
+    processedModelOutput.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
 
     onnxProcessor.prepareToPlay();
 }
@@ -28,24 +29,27 @@ void InferenceThread::run() {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     processingTime.store(duration.count());
-
-    listeners.call(&Listener::inferenceThreadFinished);
 }
 
 void InferenceThread::inference() {
 
-    for (size_t i = 0; i < MODEL_INPUT_SIZE; i++) {
+    size_t numInferences = (size_t) (rawModelInput.getAvailableSamples(0) / MODEL_INPUT_SIZE);
+
+    for (size_t i = 0; i < numInferences; i++) {
+
         // pre-processing
-        for (size_t j = 1; j < MODEL_INPUT_SIZE; j++) {
+        for (size_t j = 1; j < MODEL_INPUT_SIZE_BACKEND; j++) {
             processedModelInput[j-1] = processedModelInput[j];
         }
-        processedModelInput[MODEL_INPUT_SIZE-1] = rawModelInputBuffer[i];
+        processedModelInput[MODEL_INPUT_SIZE_BACKEND-1] = rawModelInput.popSample(0);
 
         // actual inference
         processModel();
 
         // post-processing
-        processedModelOutput[i] = rawModelOutputBuffer[0];
+        for (size_t j = 0; j < MODEL_OUTPUT_SIZE_BACKEND; j++) {
+            processedModelOutput.pushSample(rawModelOutputBuffer[j], 0);
+        }
     }
 }
 
@@ -57,11 +61,11 @@ void InferenceThread::processModel() {
         }
 }
 
-std::array<float, MODEL_INPUT_SIZE>& InferenceThread::getModelInputBuffer() {
-    return rawModelInputBuffer;
+RingBuffer& InferenceThread::getModelInputBuffer() {
+    return rawModelInput;
 }
 
-std::array<float, MODEL_INPUT_SIZE>& InferenceThread::getModelOutputBuffer() {
+RingBuffer& InferenceThread::getModelOutputBuffer() {
     return processedModelOutput;
 }
 

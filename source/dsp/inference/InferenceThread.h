@@ -14,18 +14,10 @@ public:
     InferenceThread();
     ~InferenceThread() override;
 
-    class Listener {
-    public:
-        virtual ~Listener() = default;
-        virtual void inferenceThreadFinished() = 0;
-    };
-    void addInferenceListener(Listener* listenerToAdd) {listeners.add(listenerToAdd);}
-    void removeInferenceListener(Listener* listenerToRemove) {listeners.remove(listenerToRemove);}
-
-    void prepareToPlay();
+    void prepareToPlay(const juce::dsp::ProcessSpec &spec);
     void setBackend(InferenceBackend backend);
-    std::array<float, MODEL_INPUT_SIZE>& getModelInputBuffer();
-    std::array<float, MODEL_INPUT_SIZE>& getModelOutputBuffer();
+    RingBuffer& getModelInputBuffer();
+    RingBuffer& getModelOutputBuffer();
 
 private:
     void run() override;
@@ -39,10 +31,10 @@ private:
     // LibtorchProcessor torchProcessor;
 
 
-    std::array<float, MODEL_INPUT_SIZE> rawModelInputBuffer;
-    std::array<float, MODEL_OUTPUT_SIZE> rawModelOutputBuffer;
-    std::array<float, MODEL_INPUT_SIZE> processedModelInput;
-    std::array<float, MODEL_INPUT_SIZE> processedModelOutput;
+    RingBuffer rawModelInput;
+    RingBuffer processedModelOutput;
+    std::array<float, MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
+    std::array<float, MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
     std::atomic<InferenceBackend> currentBackend {ONNX};
 
