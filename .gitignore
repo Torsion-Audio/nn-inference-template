@@ -4,3 +4,4 @@ modules/
 cmake-build*
 .idea
 .vscode
+codesign_and_copy.sh
