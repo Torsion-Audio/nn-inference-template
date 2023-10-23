@@ -2,7 +2,7 @@
 #define NN_INFERENCE_TEMPLATE_ONNXRUNTIMEPROCESSOR_H
 
 #include <JuceHeader.h>
-#include "../utils/InferenceConfig.h"
+#include "../InferenceConfig.h"
 #include "onnxruntime_cxx_api.h"
 
 class OnnxRuntimeProcessor {
@@ -14,8 +14,8 @@ public:
     void processBlock(std::array<float, MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, MODEL_OUTPUT_SIZE_BACKEND>& output);
 
 private:
-    std::string filepath = MODELS_PATH_TENSORFLOW;
-    std::string modelname = "model_0/model_0-tflite.onnx";
+    std::string filepath = MODELS_PATH_ONNX;
+    std::string modelname = MODEL_ONNX;
 #ifdef _WIN32
     std::string modelpathStr = filepath + modelname;
     std::wstring modelpath = std::wstring(modelpathStr.begin(), modelpathStr.end());

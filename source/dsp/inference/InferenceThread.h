@@ -4,7 +4,7 @@
 #include <JuceHeader.h>
 
 #include "../utils/RingBuffer.h"
-#include "utils/InferenceConfig.h"
+#include "InferenceConfig.h"
 #include "backends/OnnxRuntimeProcessor.h"
 // #include "backends/LibtorchProcessor.h"
 // #include "processors/WindowingProcessor.h"

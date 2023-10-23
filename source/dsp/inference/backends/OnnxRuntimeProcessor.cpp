@@ -11,7 +11,7 @@ OnnxRuntimeProcessor::~OnnxRuntimeProcessor()
 
 void OnnxRuntimeProcessor::prepareToPlay() {
     // Define the shape of input tensor
-    inputShape = {1, MODEL_INPUT_SIZE_BACKEND, 1};
+    inputShape = MODEL_INPUT_SHAPE;
 }
 
 void OnnxRuntimeProcessor::processBlock(std::array<float, MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, MODEL_OUTPUT_SIZE_BACKEND>& output) {

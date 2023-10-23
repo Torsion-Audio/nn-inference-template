@@ -7,9 +7,18 @@ enum InferenceBackend {
     TFLite
 };
 
+#define MODEL_TFLITE "model_0/model_0.tflite"
+#define MODEL_LIBTORCH "model_0/model_0.pt"
+#define MODELS_PATH_ONNX MODELS_PATH_TENSORFLOW
+#define MODEL_ONNX "model_0/model_0-tflite.onnx"
+
+
 #define MODEL_INPUT_SIZE 1
 #define MODEL_INPUT_SIZE_BACKEND 150 // Same as MODEL_INPUT_SIZE, but for streamable models
+#define MODEL_INPUT_SHAPE {1, MODEL_INPUT_SIZE_BACKEND, 1}
+
 #define MODEL_OUTPUT_SIZE_BACKEND 1
+
 
 #define MAX_INFERENCE_TIME 128
 #define MODEL_LATENCY 0
