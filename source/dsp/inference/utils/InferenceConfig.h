@@ -11,7 +11,7 @@ enum InferenceBackend {
 #define MODEL_INPUT_SIZE_BACKEND 150 // Same as MODEL_INPUT_SIZE, but for streamable models
 #define MODEL_OUTPUT_SIZE_BACKEND 1
 
-#define MAX_INFERENCE_TIME 1024
+#define MAX_INFERENCE_TIME 128
 #define MODEL_LATENCY 0
 
 #endif //NN_INFERENCE_TEMPLATE_INFERENCECONFIG_H

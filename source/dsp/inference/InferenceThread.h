@@ -25,6 +25,7 @@ private:
     void processModel();
 
 private:
+    size_t maxInferencesPerBlock = 0;
     std::atomic<float> processingTime;
 
     OnnxRuntimeProcessor onnxProcessor;

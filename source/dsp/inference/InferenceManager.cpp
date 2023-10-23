@@ -38,7 +38,7 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
-    if (!inferenceThread.isThreadRunning()) { // TODO fix if Thread runs to long because of multiple iterations
+    if (!inferenceThread.isThreadRunning()) {
         auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
         while (receiveBuffer.getAvailableSamples(0) > 0) {
             receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
@@ -91,7 +91,3 @@ void InferenceManager::calculateLatency(int maxSamplesPerBuffer) {
 int InferenceManager::getLatency() const {
     return latencyInSamples;
 }
-
-// void InferenceManager::inferenceThreadFinished() {
-//     numInferencedBufferAvailable.store(numInferencedBufferAvailable.load() + 1);
-// }

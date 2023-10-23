@@ -6,7 +6,6 @@
 #include "InferenceThread.h"
 #include "../utils/RingBuffer.h"
 
-// class InferenceManager : private InferenceThread::Listener {
 class InferenceManager {
 public:
     InferenceManager();
@@ -22,7 +21,6 @@ public:
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);
     void calculateLatency(int maxSamplesPerBuffer);
-    // void inferenceThreadFinished() override;
 
 private:
     bool init = true;

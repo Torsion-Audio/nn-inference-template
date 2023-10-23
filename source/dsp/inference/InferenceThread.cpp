@@ -18,6 +18,8 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
     rawModelInput.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
     processedModelOutput.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
 
+    maxInferencesPerBlock = std::max((unsigned int) 1, (spec.maximumBlockSize / MODEL_INPUT_SIZE) + 1);
+
     onnxProcessor.prepareToPlay();
 }
 
@@ -34,6 +36,7 @@ void InferenceThread::run() {
 void InferenceThread::inference() {
 
     size_t numInferences = (size_t) (rawModelInput.getAvailableSamples(0) / MODEL_INPUT_SIZE);
+    numInferences = std::min(numInferences, maxInferencesPerBlock);
 
     for (size_t i = 0; i < numInferences; i++) {
 
