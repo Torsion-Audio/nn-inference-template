@@ -21,6 +21,7 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
     maxInferencesPerBlock = std::max((unsigned int) 1, (spec.maximumBlockSize / MODEL_INPUT_SIZE) + 1);
 
     onnxProcessor.prepareToPlay();
+    torchProcessor.prepareToPlay();
 }
 
 void InferenceThread::run() {
@@ -31,6 +32,8 @@ void InferenceThread::run() {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     processingTime.store(duration.count());
+
+    std::cout << "Inference took " << duration.count() << "ms" << std::endl;
 }
 
 void InferenceThread::inference() {
@@ -57,10 +60,10 @@ void InferenceThread::inference() {
 }
 
 void InferenceThread::processModel() {
-        if (currentBackend == LIBTORCH) {
-        // processedModelOutputBuffer = torchProcessor.process(rawModelInputBuffer);
-        } else if (currentBackend == ONNX) {
+        if (currentBackend == ONNX) {
             onnxProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
+        } else if (currentBackend == LIBTORCH) {
+            torchProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
         }
 }
 

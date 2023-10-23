@@ -6,7 +6,7 @@
 #include "../utils/RingBuffer.h"
 #include "InferenceConfig.h"
 #include "backends/OnnxRuntimeProcessor.h"
-// #include "backends/LibtorchProcessor.h"
+#include "backends/LibtorchProcessor.h"
 // #include "processors/WindowingProcessor.h"
 
 class InferenceThread : public juce::Thread {
@@ -29,7 +29,7 @@ private:
     std::atomic<float> processingTime;
 
     OnnxRuntimeProcessor onnxProcessor;
-    // LibtorchProcessor torchProcessor;
+    LibtorchProcessor torchProcessor;
 
 
     RingBuffer rawModelInput;
@@ -37,7 +37,7 @@ private:
     std::array<float, MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
     std::array<float, MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
-    std::atomic<InferenceBackend> currentBackend {ONNX};
+    std::atomic<InferenceBackend> currentBackend {LIBTORCH};
 
     juce::ListenerList<Listener> listeners;
 };
