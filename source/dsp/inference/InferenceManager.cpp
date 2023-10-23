@@ -44,7 +44,8 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
             receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
         }
         auto &sendBuffer = inferenceThread.getModelInputBuffer();
-        if (sendRingBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) {
+        // add the available samples from the sendBuffer otherwise with if MODEL_INPUT_SIZE % spec.maximumBlockSize != 0 samples get stuck there
+        if (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) {
             while (sendRingBuffer.getAvailableSamples(0) > 0) {
                 sendBuffer.pushSample(sendRingBuffer.popSample(0), 0);
             }
@@ -71,7 +72,6 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
                 break;
             }
         }
-
         if (receiveRingBuffer.getAvailableSamples(0) >= buffer.getNumSamples()) {
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
                 buffer.setSample(0, sample, receiveRingBuffer.popSample(0));
@@ -79,7 +79,7 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
         }
         else {
             inferenceCounter++;
-            std::cout << "missing samples" << std::endl;
+            std::cout << "##### missing samples" << std::endl;
         }
     }
 }
