@@ -42,5 +42,4 @@ private:
     juce::ListenerList<Listener> listeners;
 };
 
-
 #endif //NN_INFERENCE_TEMPLATE_INFERENCETHREAD_H

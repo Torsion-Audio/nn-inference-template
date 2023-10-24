@@ -16,6 +16,10 @@ LibtorchProcessor::~LibtorchProcessor() {
 void LibtorchProcessor::prepareToPlay() {
     inputs.clear();
     inputs.push_back(torch::zeros(MODEL_INPUT_SHAPE_LIBTORCH));
+    // first run takes longest, so we do it here
+    std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> input;
+    std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> output;
+    processBlock(input, output);
 }
 
 void LibtorchProcessor::processBlock(std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>& output) {

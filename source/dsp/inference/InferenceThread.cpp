@@ -34,7 +34,7 @@ void InferenceThread::run() {
 
     processingTime.store(duration.count());
 
-    std::cout << "Inference took " << duration.count() << "ms" << std::endl;
+    // std::cout << "Inference took " << duration.count() << "ms" << std::endl;
 }
 
 void InferenceThread::inference() {
