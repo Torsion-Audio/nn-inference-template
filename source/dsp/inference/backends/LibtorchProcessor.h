@@ -11,7 +11,7 @@ public:
     ~LibtorchProcessor();
 
     void prepareToPlay();
-    void processBlock(std::array<float, MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, MODEL_OUTPUT_SIZE_BACKEND>& output);
+    void processBlock(std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>& output);
 
 private:
     std::string filepath = MODELS_PATH_PYTORCH;
@@ -19,7 +19,8 @@ private:
 
     torch::jit::script::Module module;
 
-    at::Tensor frame;
+    at::Tensor inputTensor;
+    at::Tensor outputTensor;
     std::vector<torch::jit::IValue> inputs;
 };
 

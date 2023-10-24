@@ -26,14 +26,20 @@ void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
     inferenceCounter = 0;
 
     init = true;
-    init_samples = 0;
+    bufferCount = 0;
+    if ((int) spec.maximumBlockSize % (BATCH_SIZE * MODEL_INPUT_SIZE) != 0 && (int) spec.maximumBlockSize > (BATCH_SIZE * MODEL_INPUT_SIZE)) {
+        initSamples = (BATCH_SIZE * MODEL_INPUT_SIZE) + (2 * (int) spec.maximumBlockSize) + MAX_INFERENCE_TIME + MODEL_LATENCY;
+    } else {
+        initSamples = (BATCH_SIZE * MODEL_INPUT_SIZE) + (int) spec.maximumBlockSize + MAX_INFERENCE_TIME + MODEL_LATENCY;
+    }
+
     calculateLatency((int) spec.maximumBlockSize);
 }
 
 void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     if (init) {
-        init_samples += buffer.getNumSamples();
-        if (init && init_samples >= MODEL_INPUT_SIZE + (int) spec.maximumBlockSize + MAX_INFERENCE_TIME + MODEL_LATENCY) init = false;
+        bufferCount += buffer.getNumSamples();
+        if (bufferCount >= initSamples) init = false;
     }
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
@@ -45,8 +51,9 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
         }
         auto &sendBuffer = inferenceThread.getModelInputBuffer();
         // add the available samples from the sendBuffer otherwise with if MODEL_INPUT_SIZE % spec.maximumBlockSize != 0 samples get stuck there
-        if (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0) >= MODEL_INPUT_SIZE) {
-            while (sendRingBuffer.getAvailableSamples(0) > 0) {
+        if (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0) >= (BATCH_SIZE * MODEL_INPUT_SIZE)) {
+            int rest = (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0)) % (BATCH_SIZE * MODEL_INPUT_SIZE);
+            while (sendRingBuffer.getAvailableSamples(0) > rest) {
                 sendBuffer.pushSample(sendRingBuffer.popSample(0), 0);
             }
             if (!inferenceThread.startThread(juce::Thread::Priority::highest)) {

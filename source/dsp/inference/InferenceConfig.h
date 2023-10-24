@@ -7,22 +7,23 @@ enum InferenceBackend {
     TFLite
 };
 
-#define MODEL_TFLITE "model_0/model_0.tflite"
-#define MODEL_LIBTORCH "model_0/model_0.pt"
+#define MODEL_TFLITE "model_0/model_0-streaming.tflite"
+#define MODEL_LIBTORCH "model_0/model_0-streaming.pt"
 #define MODELS_PATH_ONNX MODELS_PATH_TENSORFLOW
-#define MODEL_ONNX "model_0/model_0-tflite.onnx"
+#define MODEL_ONNX "model_0/model_0-tflite-streaming.onnx"
 
 
+#define BATCH_SIZE 128
 #define MODEL_INPUT_SIZE 1
 #define MODEL_INPUT_SIZE_BACKEND 150 // Same as MODEL_INPUT_SIZE, but for streamable models
-#define MODEL_INPUT_SHAPE_ONNX {1, MODEL_INPUT_SIZE_BACKEND, 1}
-#define MODEL_INPUT_SHAPE_TFLITE {1, MODEL_INPUT_SIZE_BACKEND, 1}
-#define MODEL_INPUT_SHAPE_LIBTORCH {1, 1, MODEL_INPUT_SIZE_BACKEND}
+#define MODEL_INPUT_SHAPE_ONNX {BATCH_SIZE, MODEL_INPUT_SIZE_BACKEND, 1}
+#define MODEL_INPUT_SHAPE_TFLITE {BATCH_SIZE, MODEL_INPUT_SIZE_BACKEND, 1}
+#define MODEL_INPUT_SHAPE_LIBTORCH {BATCH_SIZE, 1, MODEL_INPUT_SIZE_BACKEND}
 
 
 #define MODEL_OUTPUT_SIZE_BACKEND 1
 
-#define MAX_INFERENCE_TIME 1024
+#define MAX_INFERENCE_TIME 2048
 #define MODEL_LATENCY 0
 
 #endif //NN_INFERENCE_TEMPLATE_INFERENCECONFIG_H

@@ -34,8 +34,8 @@ private:
 
     RingBuffer rawModelInput;
     RingBuffer processedModelOutput;
-    std::array<float, MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
-    std::array<float, MODEL_INPUT_SIZE_BACKEND> processedModelInput;
+    std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
+    std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
     std::atomic<InferenceBackend> currentBackend {LIBTORCH};
 

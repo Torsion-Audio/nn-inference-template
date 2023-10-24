@@ -14,20 +14,21 @@ LibtorchProcessor::~LibtorchProcessor() {
 }
 
 void LibtorchProcessor::prepareToPlay() {
+    inputs.clear();
     inputs.push_back(torch::zeros(MODEL_INPUT_SHAPE_LIBTORCH));
 }
 
-void LibtorchProcessor::processBlock(std::array<float, MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, MODEL_OUTPUT_SIZE_BACKEND>& output) {
-
+void LibtorchProcessor::processBlock(std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>& output) {
     // Create input tensor object from input data values and shape
-    frame = torch::from_blob(input.data(), MODEL_INPUT_SIZE_BACKEND).reshape(MODEL_INPUT_SHAPE_LIBTORCH);
-    inputs[0] = frame;
+    inputTensor = torch::from_blob(input.data(), (const long long) input.size()).reshape(MODEL_INPUT_SHAPE_LIBTORCH);
+
+    inputs[0] = inputTensor;
 
     // Run inference
-    at::Tensor outputTensor = module.forward(inputs).toTensor();
+    outputTensor = module.forward(inputs).toTensor();
 
     // Extract the output tensor data
-    for (size_t i = 0; i < MODEL_OUTPUT_SIZE_BACKEND; i++) {
+    for (size_t i = 0; i < BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND; i++) {
         output[i] = outputTensor[(int64_t) i].item<float>();
     }
 }

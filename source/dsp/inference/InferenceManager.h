@@ -24,7 +24,8 @@ private:
 
 private:
     bool init = true;
-    int init_samples = 0;
+    int bufferCount = 0;
+    int initSamples = 0;
 
     InferenceThread inferenceThread;
     RingBuffer sendRingBuffer;
