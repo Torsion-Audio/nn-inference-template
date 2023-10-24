@@ -95,6 +95,8 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < outputSize; i++) {
             std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
+
+        delete[] outputData;
     }
 
     if (libtorch) {
@@ -173,5 +175,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < outputSize; i++) {
             std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
+
+        delete[] outputData;
     }
 }
