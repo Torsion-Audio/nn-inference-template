@@ -10,13 +10,22 @@ Licence: MIT
 
 int main(int argc, char* argv[]) {
 
+    std::cout << "Minimal OnnxRuntime example:" << std::endl;
+    std::cout << "-----------------------------------------" << std::endl;
+
+    int batchSize = 2;
+    int modelInputSize = 150;
+    int modelOutputSize = 1;
+
     bool tflite = true;
     bool libtorch = true;
 
     if (tflite) {
 
+        std::cout << "Tensorflow model converted to onnx:" << std::endl;
+
         std::string filepath = MODELS_PATH_TENSORFLOW;
-        std::string modelpath = filepath + "model_0/model_0-tflite.onnx";
+        std::string modelpath = filepath + "model_0/model_0-tflite-minimal.onnx";
 
         // Define environment that holds logging state used by all other objects.
         // Note: One Env must be created before using any other Onnxruntime functionality.
@@ -36,14 +45,14 @@ int main(int argc, char* argv[]) {
 #endif
 
         // Define input data
-        const int inputSize = 150;
+        const int inputSize = batchSize * modelInputSize;
         float inputData[inputSize];
         for (int i = 0; i < inputSize; i++) {
             inputData[i] = i * 0.001f;
         }
 
         // Define the shape of input tensor
-        std::array<int64_t, 3> inputShape = {1, inputSize, 1};
+        std::array<int64_t, 3> inputShape = {batchSize, modelInputSize, 1};
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
@@ -52,6 +61,9 @@ int main(int argc, char* argv[]) {
                                                                         inputShape.data(),
                                                                         inputShape.size());
 
+        std::cout << "Input shape 0: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[0] << '\n';
+        std::cout << "Input shape 1: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[1] << '\n';
+        std::cout << "Input shape 2: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[2] << '\n';
 
         // Get input and output names from model
         Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
@@ -70,22 +82,28 @@ int main(int argc, char* argv[]) {
             std::cout << e.what() << std::endl;
         }
         
+        std::cout << "Output shape 0: " << outputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[0] << std::endl;
+        std::cout << "Output shape 1: " << outputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[1] << std::endl;
+
         // Define output vector
-        int outputSize = 1;
-        float* outputData[outputSize];
+        int outputSize = batchSize * modelOutputSize;
+        float* outputData;
+        outputData = new float[outputSize];
+        outputData = outputTensors[0].GetTensorMutableData<float>();
 
         // Extract the output tensor data
-        outputData[0] = outputTensors[0].GetTensorMutableData<float>();
-
         for (int i = 0; i < outputSize; i++) {
-            std::cout << "Output of TensorFlow model: " << *outputData[i] << std::endl;    
+            std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
     }
 
     if (libtorch) {
 
+
+        std::cout << "PyTorch model converted to onnx:" << std::endl;
+
         std::string filepath = MODELS_PATH_PYTORCH;
-        std::string modelpath = filepath + "model_0/model_0-libtorch.onnx";
+        std::string modelpath = filepath + "model_0/model_0-libtorch-minimal.onnx";
 
         // Define environment that holds logging state used by all other objects.
         // Note: One Env must be created before using any other Onnxruntime functionality.
@@ -105,14 +123,14 @@ int main(int argc, char* argv[]) {
 #endif
 
         // Define input data
-        const int inputSize = 150;
+        const int inputSize = batchSize * modelInputSize;
         float inputData[inputSize];
         for (int i = 0; i < inputSize; i++) {
             inputData[i] = i * 0.001f;
         }
 
         // Define the shape of input tensor
-        std::array<int64_t, 3> inputShape = {1, 1, inputSize};
+        std::array<int64_t, 3> inputShape = {batchSize, 1, modelInputSize};
 
         // Create input tensor object from input data values and shape
         const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,
@@ -121,6 +139,9 @@ int main(int argc, char* argv[]) {
                                                                         inputShape.data(),
                                                                         inputShape.size());
 
+        std::cout << "Input shape 0: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[0] << '\n';
+        std::cout << "Input shape 1: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[1] << '\n';
+        std::cout << "Input shape 2: " << inputTensor.GetTensorTypeAndShapeInfo().GetShape()[2] << '\n';
 
         // Get input and output names from model
         Ort::AllocatedStringPtr inputName = session.GetInputNameAllocated(0, ort_alloc);
@@ -139,15 +160,18 @@ int main(int argc, char* argv[]) {
             std::cout << e.what() << std::endl;
         }
         
+        std::cout << "Output shape 0: " << outputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[0] << std::endl;
+        std::cout << "Output shape 1: " << outputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[1] << std::endl;
+
         // Define output vector
-        int outputSize = 1;
-        float* outputData[outputSize];
+        int outputSize = batchSize * modelOutputSize;
+        float* outputData;
+        outputData = new float[outputSize];
+        outputData = outputTensors[0].GetTensorMutableData<float>();
 
         // Extract the output tensor data
-        outputData[0] = outputTensors[0].GetTensorMutableData<float>();
-
         for (int i = 0; i < outputSize; i++) {
-            std::cout << "Output of PyTorch model: " << *outputData[i] << std::endl;    
+            std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
     }
 }

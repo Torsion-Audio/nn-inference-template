@@ -6,13 +6,21 @@ Licence: modified BSD
 ========================================================================== */
 
 #include <torch/script.h>
+#include <torch/torch.h>
 #include <iostream>
 #include <memory>
 
 int main(int argc, const char* argv[]) {
 
+    std::cout << "Minimal LibTorch example:" << std::endl;
+    std::cout << "-----------------------------------------" << std::endl;
+
+    int batchSize = 2;
+    int modelInputSize = 150;
+    int modelOutputSize = 1;
+
     std::string filepath = MODELS_PATH_PYTORCH;
-    const std::string modelpath = filepath + "model_0/model_0.pt";
+    const std::string modelpath = filepath + "model_0/model_0-minimal.pt";
 
     // Load model
     torch::jit::Module module;
@@ -26,29 +34,36 @@ int main(int argc, const char* argv[]) {
     }
 
     // Fill input tensor with data
-    const int inputSize = 150;
+    const int inputSize = batchSize * modelInputSize;
     float inputData[inputSize];
     for (int i = 0; i < inputSize; i++) {
         inputData[i] = i * 0.001f;
     }
 
     // Create input tensor object from input data values and reshape
-    at::Tensor frame = torch::from_blob(&inputData, {inputSize}).reshape({1, 1, inputSize});
+    torch::Tensor inputTensor = torch::from_blob(&inputData, { batchSize, 1, modelInputSize });
+
+    std::cout << "Input shape 0: " << inputTensor.sizes()[0] << '\n';
+    std::cout << "Input shape 1: " << inputTensor.sizes()[1] << '\n';
+    std::cout << "Input shape 2: " << inputTensor.sizes()[2] << '\n';
 
     // Create IValue vector for input of interpreter
     std::vector<torch::jit::IValue> inputs;
-    inputs.push_back(frame);
+    inputs.push_back(inputTensor);
 
     // Execute inference
-    at::Tensor output = module.forward(inputs).toTensor();
+    at::Tensor outputTensor = module.forward(inputs).toTensor();
+
+    std::cout << "Output shape 0: " << outputTensor.sizes()[0] << '\n';
+    std::cout << "Output shape 1: " << outputTensor.sizes()[1] << '\n';
 
     // Extract the output tensor data
-    int outputSize = 1;
+    int outputSize = batchSize * modelOutputSize;
     float outputData[outputSize];
-    outputData[0] = output.item().toFloat();
 
     for (int i = 0; i < outputSize; i++) {
-        std::cout << "Output: " << outputData[i] << '\n';
+        outputData[i] = outputTensor[i].item().toFloat();
+        std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
     }
 
     return 0;
