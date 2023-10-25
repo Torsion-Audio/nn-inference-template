@@ -92,7 +92,7 @@ if (MSVC)
     if (EXISTS "C:/Program Files (x86)/Intel/oneAPI/mkl/2023.0.0/lib/intel64")
         link_directories("C:/Program Files (x86)/Intel/oneAPI/mkl/2023.0.0/lib/intel64")
         get_directory_property(_my_link_dirs LINK_DIRECTORIES)
-        message(STATUS "_my_link_dirs = ${_my_link_dirs}")
+        message(STATUS "Intel MKL library found at ${_my_link_dirs}")
     endif()
 endif (MSVC)
 
