@@ -1,8 +1,18 @@
 #include "TFLiteProcessor.h"
 
+#ifdef _WIN32
+#include <comdef.h>
+#endif
+
 TFLiteProcessor::TFLiteProcessor()
 {
+#ifdef _WIN32
+    _bstr_t modelPathChar (modelpath.c_str());
+    model = TfLiteModelCreateFromFile(modelPathChar);
+#else
     model = TfLiteModelCreateFromFile(modelpath.c_str());
+#endif
+
     options = TfLiteInterpreterOptionsCreate();
     interpreter = TfLiteInterpreterCreate(model, options);
 }
