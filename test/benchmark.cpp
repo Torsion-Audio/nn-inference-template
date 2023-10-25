@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include "../source/PluginProcessor.h"
 #include "../source/PluginEditor.h"
-#include "TestThread.h"
+#include "utils/TestThread.h"
 
 static void BM_PROCESSOR(benchmark::State& state) {
     auto gui = juce::ScopedJuceInitialiser_GUI {};
@@ -43,8 +43,12 @@ BENCHMARK_DEFINE_F(InferenceFixture, BM_ONNX_INFERENCE)(benchmark::State& state)
     for (auto _ : state) {
         state.PauseTiming();
         plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        plugin->getInferenceThread().setBackend(ONNX);
         state.ResumeTiming();
-        plugin->getInferenceThread().testInference(ONNX);
+        plugin->getInferenceThread().startThread(juce::Thread::Priority::highest);
+        while (plugin->getInferenceThread().isThreadRunning()){
+            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        }
     }
 }
 
@@ -52,8 +56,12 @@ BENCHMARK_DEFINE_F(InferenceFixture, BM_LIBTORCH_INFERENCE)(benchmark::State& st
     for (auto _ : state) {
         state.PauseTiming();
         plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        plugin->getInferenceThread().setBackend(LIBTORCH);
         state.ResumeTiming();
-        plugin->getInferenceThread().testInference(LIBTORCH);
+        plugin->getInferenceThread().startThread(juce::Thread::Priority::highest);
+        while (plugin->getInferenceThread().isThreadRunning()){
+            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        }
     }
 }
 
@@ -61,11 +69,14 @@ BENCHMARK_DEFINE_F(InferenceFixture, BM_TFLITE_INFERENCE)(benchmark::State& stat
     for (auto _ : state) {
         state.PauseTiming();
         plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        plugin->getInferenceThread().setBackend(TFLITE);
         state.ResumeTiming();
-        plugin->getInferenceThread().testInference(TFLITE);
+        plugin->getInferenceThread().startThread(juce::Thread::Priority::highest);
+        while (plugin->getInferenceThread().isThreadRunning()){
+            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        }
     }
 }
-
 
 // --- Benchmarking threads ---
 
@@ -78,10 +89,12 @@ public:
 
     void SetUp(const ::benchmark::State& state) {
         thread = std::make_unique<TestThread>();
+        std::ignore = state;
     }
 
     void TearDown(const ::benchmark::State& state) {
         thread.reset();
+        std::ignore = state;
     }
 };
 

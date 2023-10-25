@@ -11,7 +11,7 @@ class TestThread : public juce::Thread {
 public:
     TestThread() : juce::Thread("TestThread") { }
 
-    ~TestThread() {
+    ~TestThread() override {
         stopThread(100);
     }
 
