@@ -2,9 +2,10 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "dsp/inference/InferenceManager.h"
+#include "PluginParameters.h"
 
 //==============================================================================
-class AudioPluginAudioProcessor  : public juce::AudioProcessor
+class AudioPluginAudioProcessor  : public juce::AudioProcessor, private juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -43,7 +44,17 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    juce::AudioProcessorValueTreeState& getAPVTS() { return parameters; }
+
 private:
+    void parameterChanged (const juce::String& parameterID, float newValue) override
+    {
+
+    }
+
+private:
+    juce::AudioProcessorValueTreeState parameters;
+
     InferenceManager inferenceManager;
 
     //==============================================================================

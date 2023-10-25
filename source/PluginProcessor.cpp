@@ -10,8 +10,12 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+       parameters (*this, nullptr, juce::Identifier (getName()), PluginParameters::createParameterLayout())
 {
+    for (auto & parameterID : PluginParameters::getPluginParameterList()) {
+        parameters.addParameterListener(parameterID, this);
+    }
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()

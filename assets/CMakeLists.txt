@@ -5,5 +5,10 @@
 # static library. These source files can be of any kind (wav data, images, fonts, icons etc.).
 # Conversion to binary-data will happen when your target is built.
 
-# juce_add_binary_data(BinaryData SOURCES
-# )
+ juce_add_binary_data(BinaryData SOURCES
+         graphics/background.png
+         graphics/texture_overlay.png
+         graphics/tflite_backend.png
+         graphics/libtorch_backend.png
+         graphics/onnx_backend.png
+ )
