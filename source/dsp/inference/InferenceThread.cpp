@@ -90,14 +90,3 @@ RingBuffer& InferenceThread::getModelOutputBuffer() {
 void InferenceThread::setBackend(InferenceBackend backend) {
     currentBackend.store(backend);
 }
-
-void InferenceThread::testInference(InferenceBackend backend) {
-    currentBackend.store(backend);
-    run();
-}
-
-void InferenceThread::testPushSamples(int numSamples) {
-    for (int i = 0; i < numSamples; i++) {
-        rawModelInput.pushSample(-1.f + (float) (std::rand()) / ((float) (RAND_MAX/2.f)), 0);
-    }
-}
