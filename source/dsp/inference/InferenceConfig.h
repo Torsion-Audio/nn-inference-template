@@ -4,7 +4,7 @@
 enum InferenceBackend {
     LIBTORCH,
     ONNX,
-    TFLite
+    TFLITE
 };
 
 #define MODEL_TFLITE "model_0/model_0-streaming.tflite"

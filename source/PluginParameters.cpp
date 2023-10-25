@@ -6,8 +6,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginParameters::createPara
 
     params.push_back (std::make_unique<juce::AudioParameterChoice> (BACKEND_TYPE_ID,
                                                                     BACKEND_TYPE_NAME,
-                                                                    juce::StringArray{"TORCH", "ONNX", "TFLITE"},
-                                                                    0));
+                                                                    backendTypes,
+                                                                    backendTypes.indexOf(defaultBackend)));
 
     params.push_back (std::make_unique<juce::AudioParameterBool>   (WINDOWING_ENABLED_ID,
                                                                     WINDOWING_ENABLED_NAME,
