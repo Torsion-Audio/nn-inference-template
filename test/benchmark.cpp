@@ -23,44 +23,44 @@ class InferenceFixture : public benchmark::Fixture
 {
 public:
     std::unique_ptr<AudioPluginAudioProcessor> plugin;
-    std::unique_ptr<juce::AudioBuffer<float>> buffer;
-    std::unique_ptr<juce::MidiBuffer> midiBuffer;
 
     InferenceFixture() {
     }
 
     void SetUp(const ::benchmark::State& state) {
         plugin = std::make_unique<AudioPluginAudioProcessor>();
-        buffer = std::make_unique<juce::AudioBuffer<float>>();
-        midiBuffer = std::make_unique<juce::MidiBuffer>();
-        buffer->setSize (2, 512);
-        buffer->clear();
-        midiBuffer->clear();
-        plugin->prepareToPlay (44100, 1024);
-        plugin->processBlock (*buffer, *midiBuffer);
+        plugin->prepareToPlay (44100, (int) state.range(0));
     }
 
     void TearDown(const ::benchmark::State& state) {
         plugin.reset();
-        buffer.reset();
-        midiBuffer.reset();
+        std::cout << "Buffer size: " << state.range(0) << " samples | " << state.range(0) * 1000.f/44100.f << " ms" << std::endl;
     }
 };
 
-BENCHMARK_DEFINE_F(InferenceFixture, BM_ONNX_INFERENCE)(benchmark::State& st) {
-    for (auto _ : st) {
+BENCHMARK_DEFINE_F(InferenceFixture, BM_ONNX_INFERENCE)(benchmark::State& state) {
+    for (auto _ : state) {
+        state.PauseTiming();
+        plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        state.ResumeTiming();
         plugin->getInferenceThread().testInference(ONNX);
     }
 }
 
-BENCHMARK_DEFINE_F(InferenceFixture, BM_LIBTORCH_INFERENCE)(benchmark::State& st) {
-    for (auto _ : st) {
+BENCHMARK_DEFINE_F(InferenceFixture, BM_LIBTORCH_INFERENCE)(benchmark::State& state) {
+    for (auto _ : state) {
+        state.PauseTiming();
+        plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        state.ResumeTiming();
         plugin->getInferenceThread().testInference(LIBTORCH);
     }
 }
 
-BENCHMARK_DEFINE_F(InferenceFixture, BM_TFLITE_INFERENCE)(benchmark::State& st) {
-    for (auto _ : st) {
+BENCHMARK_DEFINE_F(InferenceFixture, BM_TFLITE_INFERENCE)(benchmark::State& state) {
+    for (auto _ : state) {
+        state.PauseTiming();
+        plugin->getInferenceThread().testPushSamples((int) state.range(0));
+        state.ResumeTiming();
         plugin->getInferenceThread().testInference(TFLITE);
     }
 }
@@ -68,6 +68,6 @@ BENCHMARK_DEFINE_F(InferenceFixture, BM_TFLITE_INFERENCE)(benchmark::State& st) 
 // Register the function as a benchmark
 BENCHMARK(BM_PROCESSOR)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_EDITOR)->Unit(benchmark::kMillisecond);
-BENCHMARK_REGISTER_F(InferenceFixture, BM_ONNX_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);
-BENCHMARK_REGISTER_F(InferenceFixture, BM_LIBTORCH_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);
-// BENCHMARK_REGISTER_F(InferenceFixture, BM_TFLITE_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);
+BENCHMARK_REGISTER_F(InferenceFixture, BM_ONNX_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(32)->Repetitions(1)->RangeMultiplier(2)->Range(128, 8<<10);
+BENCHMARK_REGISTER_F(InferenceFixture, BM_LIBTORCH_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(32)->Repetitions(1)->RangeMultiplier(2)->Range(128, 8<<10);
+BENCHMARK_REGISTER_F(InferenceFixture, BM_TFLITE_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(32)->Repetitions(1)->RangeMultiplier(2)->Range(128, 8<<10);
