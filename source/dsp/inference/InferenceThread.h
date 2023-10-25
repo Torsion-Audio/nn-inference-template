@@ -18,6 +18,7 @@ public:
     void setBackend(InferenceBackend backend);
     RingBuffer& getModelInputBuffer();
     RingBuffer& getModelOutputBuffer();
+    void testInference(InferenceBackend backend);
 
 private:
     void run() override;

@@ -27,7 +27,7 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
 
 void InferenceThread::run() {
     auto start = std::chrono::high_resolution_clock::now();
-    inference();
+        inference();
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
@@ -86,4 +86,9 @@ RingBuffer& InferenceThread::getModelOutputBuffer() {
 
 void InferenceThread::setBackend(InferenceBackend backend) {
     currentBackend.store(backend);
+}
+
+void InferenceThread::testInference(InferenceBackend backend) {
+    currentBackend.store(backend);
+    run();
 }

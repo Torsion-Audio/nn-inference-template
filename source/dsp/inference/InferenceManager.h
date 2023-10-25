@@ -17,6 +17,7 @@ public:
     void parameterChanged(const juce::String &parameterID, float newValue);
 
     int getLatency() const;
+    InferenceThread &getInferenceThread();
 
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);

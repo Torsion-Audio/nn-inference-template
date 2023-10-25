@@ -47,7 +47,7 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     if (!inferenceThread.isThreadRunning()) {
         auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
         while (receiveBuffer.getAvailableSamples(0) > 0) {
-            receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
+                        receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
         }
         auto &sendBuffer = inferenceThread.getModelInputBuffer();
         // add the available samples from the sendBuffer otherwise with if MODEL_INPUT_SIZE % spec.maximumBlockSize != 0 samples get stuck there
@@ -97,4 +97,8 @@ void InferenceManager::calculateLatency(int maxSamplesPerBuffer) {
 
 int InferenceManager::getLatency() const {
     return latencyInSamples;
+}
+
+InferenceThread &InferenceManager::getInferenceThread() {
+    return inferenceThread;
 }

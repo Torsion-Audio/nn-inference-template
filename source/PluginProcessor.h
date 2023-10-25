@@ -43,6 +43,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    InferenceThread &getInferenceThread();
+
 private:
     InferenceManager inferenceManager;
 

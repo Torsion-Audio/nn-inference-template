@@ -91,8 +91,6 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     juce::dsp::ProcessSpec spec {sampleRate,
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
-    std::cout << spec.sampleRate << std::endl;
-    std::cout << spec.maximumBlockSize << std::endl;
     inferenceManager.prepareToPlay(spec);
     juce::ignoreUnused (sampleRate, samplesPerBlock);
 }
@@ -192,4 +190,8 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AudioPluginAudioProcessor();
+}
+
+InferenceThread &AudioPluginAudioProcessor::getInferenceThread() {
+    return inferenceManager.getInferenceThread();
 }

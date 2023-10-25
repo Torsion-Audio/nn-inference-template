@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include <gtest/gtest.h>
 
-TEST(Benchmark, Client){
+TEST(Benchmark, All){
     benchmark::RunSpecifiedBenchmarks();
     std::cout << "--------------------------------------------------------------" << std::endl;
 }
