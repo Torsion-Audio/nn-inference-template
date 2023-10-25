@@ -23,6 +23,7 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
 
     onnxProcessor.prepareToPlay();
     torchProcessor.prepareToPlay();
+    tfliteProcessor.prepareToPlay();
 }
 
 void InferenceThread::run() {
@@ -73,6 +74,8 @@ void InferenceThread::processModel() {
             onnxProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
         } else if (currentBackend == LIBTORCH) {
             torchProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
+        } else if (currentBackend == TFLITE) {
+            tfliteProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
         }
 }
 

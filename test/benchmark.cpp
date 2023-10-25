@@ -47,24 +47,27 @@ public:
     }
 };
 
-BENCHMARK_DEFINE_F(InferenceFixture, BM_ONNX_INFERENCE)(benchmark::State& st) 
-{
-    for (auto _ : st) 
-    {
+BENCHMARK_DEFINE_F(InferenceFixture, BM_ONNX_INFERENCE)(benchmark::State& st) {
+    for (auto _ : st) {
         plugin->getInferenceThread().testInference(ONNX);
     }
 }
 
-BENCHMARK_DEFINE_F(InferenceFixture, BM_LIBTORCH_INFERENCE)(benchmark::State& st) 
-{
-    for (auto _ : st) 
-    {
+BENCHMARK_DEFINE_F(InferenceFixture, BM_LIBTORCH_INFERENCE)(benchmark::State& st) {
+    for (auto _ : st) {
         plugin->getInferenceThread().testInference(LIBTORCH);
+    }
+}
+
+BENCHMARK_DEFINE_F(InferenceFixture, BM_TFLITE_INFERENCE)(benchmark::State& st) {
+    for (auto _ : st) {
+        plugin->getInferenceThread().testInference(TFLITE);
     }
 }
 
 // Register the function as a benchmark
 BENCHMARK(BM_PROCESSOR)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_EDITOR)->Unit(benchmark::kMillisecond);
-BENCHMARK_REGISTER_F(InferenceFixture, BM_ONNX_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1);
-BENCHMARK_REGISTER_F(InferenceFixture, BM_LIBTORCH_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1);
+BENCHMARK_REGISTER_F(InferenceFixture, BM_ONNX_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);
+BENCHMARK_REGISTER_F(InferenceFixture, BM_LIBTORCH_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);
+// BENCHMARK_REGISTER_F(InferenceFixture, BM_TFLITE_INFERENCE)->Unit(benchmark::kMillisecond)->Iterations(10)->Repetitions(1)->Threads(1);

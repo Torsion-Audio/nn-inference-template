@@ -7,6 +7,7 @@
 #include "InferenceConfig.h"
 #include "backends/OnnxRuntimeProcessor.h"
 #include "backends/LibtorchProcessor.h"
+#include "backends/TFLiteProcessor.h"
 // #include "processors/WindowingProcessor.h"
 
 class InferenceThread : public juce::Thread {
@@ -19,7 +20,7 @@ public:
     RingBuffer& getModelInputBuffer();
     RingBuffer& getModelOutputBuffer();
     void testInference(InferenceBackend backend);
-
+    
 private:
     void run() override;
     void inference();
@@ -31,14 +32,14 @@ private:
 
     OnnxRuntimeProcessor onnxProcessor;
     LibtorchProcessor torchProcessor;
-
+    TFLiteProcessor tfliteProcessor;
 
     RingBuffer rawModelInput;
     RingBuffer processedModelOutput;
     std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
     std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
-    std::atomic<InferenceBackend> currentBackend {LIBTORCH};
+    std::atomic<InferenceBackend> currentBackend {TFLITE};
 
     juce::ListenerList<Listener> listeners;
 };
