@@ -53,6 +53,12 @@ public:
         repaint();
     }
 
+    void mouseMove (const juce::MouseEvent &event) override {
+        auto pos = event.getPosition();
+
+        std::cout << pos.getX() << " " << pos.getY() << std::endl;
+    }
+
     void mouseDown (const juce::MouseEvent &event) override {
         getNextBackend();
         repaint();
@@ -66,7 +72,6 @@ public:
                 backendTFLite->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
                 break;
             case InferenceBackend::LIBTORCH:
-                std::cout << "draw libtorch" << std::endl;
                 backendLibTorch->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
                 break;
             case InferenceBackend::ONNX:

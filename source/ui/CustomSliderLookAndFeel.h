@@ -19,10 +19,11 @@ public:
                            float sliderPos, float minSliderPos, float maxSliderPos,
                            const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-            auto trackWidth = (float) height * 0.05f;
+            auto trackWidth = (float) height * 0.025f;
 
-            juce::Point<float> startPoint ((float) x, (float) y + (float) height * 0.5f);
-            juce::Point<float> endPoint ((float) (width + x), startPoint.y);
+            juce::Point<float> startPoint ((float) width * 0.05f, (float) y + (float) height * 0.5f);
+            juce::Point<float> endPoint ((float) width * 0.95f, startPoint.y);
+            float distance = endPoint.x - startPoint.x;
 
             juce::Path backgroundTrack;
             backgroundTrack.startNewSubPath (startPoint);
@@ -34,13 +35,16 @@ public:
 
             float thumbWidth = (float) width / 8.f;
             float thumbHeight = thumbWidth / 2.f;
-            juce::Point<float> thumbCenter = { sliderPos, (float) y + (float) height * 0.5f };
+
+
+            float thumbX = startPoint.getX() + sliderPos / (float) width * (distance - 20.f);
+            juce::Point<float> thumbCenter = { thumbX, (float) y + (float) height * 0.5f };
 
             juce::Rectangle<float> thumbRec = { thumbCenter.getX() - thumbWidth / 2.f, thumbCenter.getY() - thumbHeight / 2, thumbWidth, thumbHeight };
             g.setColour (juce::Colour { 0xff9F0E5D });
             g.fillRoundedRectangle(thumbRec, thumbHeight / 2.f);
 
-            float expansionRatio = 1.1f;
+            float expansionRatio = 1.2f;
 
             thumbRec.setWidth(thumbRec.getWidth() * expansionRatio);
             thumbRec.setHeight(thumbRec.getHeight() * expansionRatio);
