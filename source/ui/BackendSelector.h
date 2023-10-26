@@ -1,92 +1,59 @@
-//
-// Created by valentin.ackva on 25.10.2023.
-//
-
 #ifndef NN_INFERENCE_TEMPLATE_BACKENDSELECTOR_H
 #define NN_INFERENCE_TEMPLATE_BACKENDSELECTOR_H
 
 #include <JuceHeader.h>
-#include "config.h"
 #include "../PluginParameters.h"
 #include "../dsp/inference/InferenceConfig.h"
 
 class BackendSelector : public juce::Component {
 public:
-    BackendSelector() {
-        backendList = PluginParameters::backendTypes;
-        currentBackend = getInferenceBackend(PluginParameters::defaultBackend);
-    }
+    BackendSelector(juce::AudioProcessorValueTreeState& state);
 
-    ~BackendSelector() override {
+    void setBackend(int backendID);
 
-    }
-
-    void resized() override {
-
-    }
-
-    void getNextBackend() {
-        switch (currentBackend) {
-            case InferenceBackend::TFLITE:
-                currentBackend = InferenceBackend::LIBTORCH;
-                break;
-            case InferenceBackend::LIBTORCH:
-                currentBackend = InferenceBackend::ONNX;
-                break;
-            case InferenceBackend::ONNX:
-                currentBackend = InferenceBackend::TFLITE;
-                break;
-        }
-    }
-
-
-    InferenceBackend getInferenceBackend(juce::String& backendStr) {
-        if (backendStr == "TFLITE") return InferenceBackend::TFLITE;
-        if (backendStr == "LIBTORCH") return InferenceBackend::LIBTORCH;
-        if (backendStr == "ONNXRUNTIME") return InferenceBackend::ONNX;
-        throw std::invalid_argument("Invalid backend string");
-    }
-
-    void backendChanged(int backendID) {
-        juce::String type = backendList.getReference(backendID);
-        currentBackend = getInferenceBackend(type);
-        repaint();
-    }
-
-    void mouseMove (const juce::MouseEvent &event) override {
-        auto pos = event.getPosition();
-
-        std::cout << pos.getX() << " " << pos.getY() << std::endl;
-    }
-
-    void mouseDown (const juce::MouseEvent &event) override {
-        getNextBackend();
-        repaint();
-    }
-
-    void paint(juce::Graphics& g) override {
-        auto currentBound = getBounds();
-
-        switch (currentBackend) {
-            case InferenceBackend::TFLITE:
-                backendTFLite->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
-                break;
-            case InferenceBackend::LIBTORCH:
-                backendLibTorch->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
-                break;
-            case InferenceBackend::ONNX:
-                backendONNX->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
-                break;
-        }
-    }
+    void paint(juce::Graphics& g) override;
+    void resized() override;
 
 private:
+    void mouseExit(const juce::MouseEvent &event) override;
+    void mouseMove (const juce::MouseEvent &event) override;
+    void mouseDown (const juce::MouseEvent &event) override;
+
+    void backendChanged();
+
+    int getCurrentBackendID();
+    void getNextBackend();
+
+    InferenceBackend stringToBackend(juce::String& backendStr);
+    juce::String backendToString(InferenceBackend backend);
+
+private:
+    juce::AudioProcessorValueTreeState& apvts;
+
     std::unique_ptr<juce::Drawable> backendTFLite = juce::Drawable::createFromImageData (BinaryData::tflite_backend_png, BinaryData::tflite_backend_pngSize);
     std::unique_ptr<juce::Drawable> backendLibTorch = juce::Drawable::createFromImageData (BinaryData::libtorch_backend_png, BinaryData::libtorch_backend_pngSize);
     std::unique_ptr<juce::Drawable> backendONNX = juce::Drawable::createFromImageData (BinaryData::onnx_backend_png, BinaryData::onnx_backend_pngSize);
+    std::unique_ptr<juce::Drawable> highlight = juce::Drawable::createFromImageData (BinaryData::highlight_png, BinaryData::highlight_pngSize);
+
+    juce::Rectangle<int> tfliteBounds;
+    juce::Rectangle<int> libtorchBounds;
+    juce::Rectangle<int> onnxBounds;
+
+    juce::Rectangle<int> tfliteHighlightBounds;
+    juce::Rectangle<int> libtorchHighlightBounds;
+    juce::Rectangle<int> onnxHighlightBounds;
 
     juce::StringArray backendList;
     InferenceBackend currentBackend;
+
+    enum BackendHover {
+        NONE,
+        TFLITE_HOVER,
+        LIBTORCH_HOVER,
+        ONNX_HOVER
+    };
+
+    BackendHover currentHover = NONE;
 };
 
 #endif //NN_INFERENCE_TEMPLATE_BACKENDSELECTOR_H
