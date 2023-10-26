@@ -1,7 +1,3 @@
-//
-// Created by valentin.ackva on 25.10.2023.
-//
-
 #ifndef NN_INFERENCE_TEMPLATE_CUSTOMSLIDERLOOKANDFEEL_H
 #define NN_INFERENCE_TEMPLATE_CUSTOMSLIDERLOOKANDFEEL_H
 
@@ -19,50 +15,52 @@ public:
                            float sliderPos, float minSliderPos, float maxSliderPos,
                            const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
-            auto trackWidth = (float) height * 0.025f;
+        juce::ignoreUnused(x, minSliderPos, maxSliderPos, style, slider);
 
-            juce::Point<float> startPoint ((float) width * 0.05f, (float) y + (float) height * 0.5f);
-            juce::Point<float> endPoint ((float) width * 0.95f, startPoint.y);
-            float distance = endPoint.x - startPoint.x;
+        auto trackWidth = (float) height * 0.025f;
 
-            juce::Path backgroundTrack;
-            backgroundTrack.startNewSubPath (startPoint);
-            backgroundTrack.lineTo (endPoint);
+        juce::Point<float> startPoint ((float) width * 0.05f, (float) y + (float) height * 0.5f);
+        juce::Point<float> endPoint ((float) width * 0.95f, startPoint.y);
+        float distance = endPoint.x - startPoint.x;
 
-            g.setColour (juce::Colour{ 0xff3E3846 });
-            g.strokePath (backgroundTrack, { trackWidth, juce::PathStrokeType::curved, juce::PathStrokeType::rounded });
+        juce::Path backgroundTrack;
+        backgroundTrack.startNewSubPath (startPoint);
+        backgroundTrack.lineTo (endPoint);
 
-
-            float thumbWidth = (float) width / 8.f;
-            float thumbHeight = thumbWidth / 2.f;
+        g.setColour (juce::Colour{ 0xff3E3846 });
+        g.strokePath (backgroundTrack, { trackWidth, juce::PathStrokeType::curved, juce::PathStrokeType::rounded });
 
 
-            float thumbX = startPoint.getX() + sliderPos / (float) width * (distance - 20.f);
-            juce::Point<float> thumbCenter = { thumbX, (float) y + (float) height * 0.5f };
+        float thumbWidth = (float) width / 8.f;
+        float thumbHeight = thumbWidth / 2.f;
 
-            juce::Rectangle<float> thumbRec = { thumbCenter.getX() - thumbWidth / 2.f, thumbCenter.getY() - thumbHeight / 2, thumbWidth, thumbHeight };
-            g.setColour (juce::Colour { 0xff9F0E5D });
-            g.fillRoundedRectangle(thumbRec, thumbHeight / 2.f);
 
-            float expansionRatio = 1.2f;
+        float thumbX = startPoint.getX() + sliderPos / (float) width * (distance - 20.f);
+        juce::Point<float> thumbCenter = { thumbX, (float) y + (float) height * 0.5f };
 
-            thumbRec.setWidth(thumbRec.getWidth() * expansionRatio);
-            thumbRec.setHeight(thumbRec.getHeight() * expansionRatio);
-            thumbRec.setCentre(thumbCenter);
+        juce::Rectangle<float> thumbRec = { thumbCenter.getX() - thumbWidth / 2.f, thumbCenter.getY() - thumbHeight / 2, thumbWidth, thumbHeight };
+        g.setColour (juce::Colour { 0xff9F0E5D });
+        g.fillRoundedRectangle(thumbRec, thumbHeight / 2.f);
 
-            juce::Image offscreenImage = juce::Image(juce::Image::ARGB, width, height, true);
+        float expansionRatio = 1.2f;
 
-            juce::Graphics offscreenGraphics(offscreenImage);
+        thumbRec.setWidth(thumbRec.getWidth() * expansionRatio);
+        thumbRec.setHeight(thumbRec.getHeight() * expansionRatio);
+        thumbRec.setCentre(thumbCenter);
 
-            offscreenGraphics.setColour(juce::Colour { 0xff9F0E5D });
-            offscreenGraphics.fillRoundedRectangle(thumbRec, thumbHeight / 2.0f * expansionRatio);
+        juce::Image offscreenImage = juce::Image(juce::Image::ARGB, width, height, true);
 
-            juce::ImageConvolutionKernel kernel(15);
-            kernel.createGaussianBlur(3.0f);
-            kernel.applyToImage(offscreenImage, offscreenImage, offscreenImage.getBounds());
+        juce::Graphics offscreenGraphics(offscreenImage);
 
-            g.drawImageAt(offscreenImage, 0, 0);
-        }
+        offscreenGraphics.setColour(juce::Colour { 0xff9F0E5D });
+        offscreenGraphics.fillRoundedRectangle(thumbRec, thumbHeight / 2.0f * expansionRatio);
+
+        juce::ImageConvolutionKernel kernel(15);
+        kernel.createGaussianBlur(3.0f);
+        kernel.applyToImage(offscreenImage, offscreenImage, offscreenImage.getBounds());
+
+        g.drawImageAt(offscreenImage, 0, 0);
+    }
 };
 
 #endif //NN_INFERENCE_TEMPLATE_CUSTOMSLIDERLOOKANDFEEL_H
