@@ -3,12 +3,21 @@
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+    : AudioProcessorEditor (&p), processorRef (p), apvts(p.getValueTreeState()), dryWetSlider(apvts), backendSelector(apvts)
 {
     juce::ignoreUnused (processorRef);
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
+
+    for (auto & parameterID : PluginParameters::getPluginParameterList()) {
+        apvts.addParameterListener(parameterID, this);
+    }
+
+    double ratio = static_cast<double>(pluginEditorWidth) / static_cast<double>(pluginEditorHeight);
+    setResizeLimits(pluginEditorWidth / 2, pluginEditorHeight / 2, pluginEditorWidth, pluginEditorHeight);
+    getConstrainer()->setFixedAspectRatio(ratio);
+    setSize(pluginEditorWidth, pluginEditorHeight);
+
+    addAndMakeVisible(backendSelector);
+    addAndMakeVisible(dryWetSlider);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -18,16 +27,24 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 //==============================================================================
 void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    auto currentBound = getBounds();
+    background->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::centred, 1.0f);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    auto scaledHeight = [&] (int factor) {
+        return static_cast<int>((float) getHeight() / (float) pluginEditorHeight * factor);
+    };
+
+    backendSelector.setBounds(getBounds().removeFromTop(scaledHeight(500)));
+
+    auto sliderComponentBound = getBounds().removeFromTop(scaledHeight(710)).removeFromBottom(scaledHeight(60));
+    dryWetSlider.setBounds(sliderComponentBound);
+}
+
+void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue) {
+    if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
+        backendSelector.setBackend(static_cast<int>(newValue));
+    }
 }

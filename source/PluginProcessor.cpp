@@ -10,8 +10,12 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+       parameters (*this, nullptr, juce::Identifier (getName()), PluginParameters::createParameterLayout())
 {
+    for (auto & parameterID : PluginParameters::getPluginParameterList()) {
+        parameters.addParameterListener(parameterID, this);
+    }
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -183,6 +187,10 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     juce::ignoreUnused (data, sizeInBytes);
+}
+
+void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue) {
+    std::cout << "parameterChanged: " << parameterID << " " << newValue << "\n";
 }
 
 //==============================================================================

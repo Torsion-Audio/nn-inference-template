@@ -138,7 +138,7 @@ target_link_libraries(${TARGET_NAME}
 		onnxruntime
 		torch
         tensorflowlite_c
-		# BinaryData
+		BinaryData
         juce::juce_audio_utils
         juce::juce_dsp
         juce::juce_core
