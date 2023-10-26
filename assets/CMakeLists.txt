@@ -11,4 +11,5 @@
          graphics/tflite_backend.png
          graphics/libtorch_backend.png
          graphics/onnx_backend.png
+         graphics/highlight.png
  )

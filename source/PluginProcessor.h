@@ -44,13 +44,10 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    juce::AudioProcessorValueTreeState& getAPVTS() { return parameters; }
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return parameters; }
 
 private:
-    void parameterChanged (const juce::String& parameterID, float newValue) override
-    {
-
-    }
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
 private:
     juce::AudioProcessorValueTreeState parameters;

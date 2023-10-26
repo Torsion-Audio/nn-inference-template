@@ -3,15 +3,13 @@
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
+    : AudioProcessorEditor (&p), processorRef (p), apvts(p.getValueTreeState()), dryWetSlider(apvts), backendSelector(apvts)
 {
     juce::ignoreUnused (processorRef);
 
-    auto &parameters = processorRef.getAPVTS();
     for (auto & parameterID : PluginParameters::getPluginParameterList()) {
-        parameters.addParameterListener(parameterID, this);
+        apvts.addParameterListener(parameterID, this);
     }
-
 
     double ratio = static_cast<double>(pluginEditorWidth) / static_cast<double>(pluginEditorHeight);
     setResizeLimits(pluginEditorWidth / 2, pluginEditorHeight / 2, pluginEditorWidth, pluginEditorHeight);
@@ -31,17 +29,22 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto currentBound = getBounds();
     background->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::centred, 1.0f);
-    texture->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::centred, 0.5f);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
 {
     auto scaledHeight = [&] (int factor) {
-        return static_cast<int>((float) getHeight() / (float) DEFAULT_EDITOR_HEIGHT * factor);
+        return static_cast<int>((float) getHeight() / (float) pluginEditorHeight * factor);
     };
 
     backendSelector.setBounds(getBounds().removeFromTop(scaledHeight(500)));
 
     auto sliderComponentBound = getBounds().removeFromTop(scaledHeight(710)).removeFromBottom(scaledHeight(60));
     dryWetSlider.setBounds(sliderComponentBound);
+}
+
+void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue) {
+    if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
+        backendSelector.setBackend(static_cast<int>(newValue));
+    }
 }
