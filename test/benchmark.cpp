@@ -53,8 +53,8 @@ public:
 
 }
 
-    ProcessBlockFixture() {std::cout << "Fixture constructor" << std::endl;}
-    ~ProcessBlockFixture() {std::cout << "Fixture destructor" << std::endl;}
+    ProcessBlockFixture() {}
+    ~ProcessBlockFixture() {}
 
     void SetUp(const ::benchmark::State& state);
 
@@ -74,6 +74,7 @@ public:
         fixture.plugin = std::make_unique<AudioPluginAudioProcessor>();
         fixture.buffer = std::make_unique<juce::AudioBuffer<float>>(2, *fixture.bufferSize);
         fixture.midiBuffer = std::make_unique<juce::MidiBuffer>();
+        std::ignore = state;
     }
 
     ~SingletonSetup() {
@@ -215,4 +216,14 @@ BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_TFLITE_BACKEND)
     return *(std::max_element(std::begin(v), std::end(v)));
   })
 ->DisplayAggregatesOnly(true);
-BENCHMARK_REGISTER_F(ThreadFixture, BM_THREAD)->Unit(benchmark::kMillisecond)->Iterations(32)->Repetitions(1);
+
+BENCHMARK_REGISTER_F(ThreadFixture, BM_THREAD)
+->Unit(benchmark::kMillisecond)
+->Iterations(1)->Repetitions(128)
+->ComputeStatistics("min", [](const std::vector<double>& v) -> double {
+    return *(std::min_element(std::begin(v), std::end(v)));
+  })
+->ComputeStatistics("max", [](const std::vector<double>& v) -> double {
+    return *(std::max_element(std::begin(v), std::end(v)));
+  })
+->DisplayAggregatesOnly(true);
