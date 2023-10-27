@@ -148,7 +148,6 @@ public:
     std::unique_ptr<TestThread> thread;
 
     ThreadFixture() {
-        auto gui = juce::ScopedJuceInitialiser_GUI {};
     }
 
     void SetUp(const ::benchmark::State& state) {
@@ -180,7 +179,7 @@ BENCHMARK_DEFINE_F(ThreadFixture, BM_THREAD)(benchmark::State& state) {
 
 BENCHMARK(BM_PROCESSOR)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_EDITOR)->Unit(benchmark::kMillisecond);
-
+//
 BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_ONNX_BACKEND)
 ->Unit(benchmark::kMillisecond)
 ->Iterations(1)->Repetitions(32)

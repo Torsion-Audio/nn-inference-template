@@ -88,6 +88,5 @@ RingBuffer& InferenceThread::getModelOutputBuffer() {
 }
 
 void InferenceThread::setBackend(InferenceBackend backend) {
-    std::cout << "setBackend : " << backend << std::endl;
     currentBackend.store(backend);
 }
