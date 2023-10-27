@@ -97,6 +97,8 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     inferenceManager.prepareToPlay(spec);
     dryWetMixer.prepare(spec);
 
+    dryWetMixer.setWetLatency(inferenceManager.getLatency());
+
     juce::ignoreUnused (sampleRate, samplesPerBlock);
 }
 
@@ -147,6 +149,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     dryWetMixer.setDrySamples(buffer);
     inferenceManager.processBlock(buffer);
+
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+        buffer.setSample(1, sample, buffer.getSample(0, sample));
+    }
+
     dryWetMixer.setWetSamples(buffer);
 }
 
