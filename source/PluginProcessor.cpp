@@ -90,13 +90,14 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
     juce::dsp::ProcessSpec spec {sampleRate,
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
-//    inferenceManager.prepareToPlay(spec);
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+
+    inferenceManager.prepareToPlay(spec);
+    dryWetMixer.prepare(spec);
+
+    dryWetMixer.setWetLatency(inferenceManager.getLatency());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -138,28 +139,17 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    inferenceManager.processBlock(buffer);
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData);
-        // ..do something to the data...
+    dryWetMixer.setDrySamples(buffer);
+    inferenceManager.processBlock(buffer);
+
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+        buffer.setSample(1, sample, buffer.getSample(0, sample));
     }
+
+    dryWetMixer.setWetSamples(buffer);
 }
 
 //==============================================================================
@@ -170,8 +160,7 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-//    return new AudioPluginAudioProcessorEditor (*this);
-      return new juce::GenericAudioProcessorEditor(*this);
+    return new AudioPluginAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -191,17 +180,12 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 }
 
 void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue) {
-    return;
-
     if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
-        // TODO
-        if (newValue == 0.0f) {
-            inferenceManager.getInferenceThread().setBackend(InferenceBackend::TFLITE);
-        } else if (newValue == 1.0f) {
-            inferenceManager.getInferenceThread().setBackend(InferenceBackend::LIBTORCH);
-        } else if (newValue == 2.0f) {
-            inferenceManager.getInferenceThread().setBackend(InferenceBackend::ONNX);
-        }
+        InferenceBackend newInferenceBackend = (newValue == 0.0f) ? TFLITE :
+                                               (newValue == 1.f) ? LIBTORCH : ONNX;
+        inferenceManager.getInferenceThread().setBackend(newInferenceBackend);
+    } else if (parameterID == PluginParameters::DRY_WET_ID.getParamID()) {
+        dryWetMixer.setDryWetProportion(newValue);
     }
 }
 

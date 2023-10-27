@@ -2,7 +2,9 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "dsp/inference/InferenceManager.h"
+
 #include "PluginParameters.h"
+#include "dsp/utils/Mixer.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, private juce::AudioProcessorValueTreeState::Listener
@@ -54,6 +56,7 @@ private:
     juce::AudioProcessorValueTreeState parameters;
 
     InferenceManager inferenceManager;
+    Mixer dryWetMixer;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
