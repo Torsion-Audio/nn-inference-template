@@ -140,5 +140,7 @@ juce::String BackendSelector::backendToString(InferenceBackend backend) {
             return "LIBTORCH";
         case InferenceBackend::ONNX:
             return "ONNXRUNTIME";
+        default:
+            return "";
     }
 }

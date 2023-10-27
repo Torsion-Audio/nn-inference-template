@@ -95,7 +95,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     juce::dsp::ProcessSpec spec {sampleRate,
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
-    inferenceManager.prepareToPlay(spec);
+//    inferenceManager.prepareToPlay(spec);
     juce::ignoreUnused (sampleRate, samplesPerBlock);
 }
 
@@ -170,7 +170,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor (*this);
+//    return new AudioPluginAudioProcessorEditor (*this);
+      return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -190,7 +191,18 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 }
 
 void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue) {
-    std::cout << "parameterChanged: " << parameterID << " " << newValue << "\n";
+    return;
+
+    if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
+        // TODO
+        if (newValue == 0.0f) {
+            inferenceManager.getInferenceThread().setBackend(InferenceBackend::TFLITE);
+        } else if (newValue == 1.0f) {
+            inferenceManager.getInferenceThread().setBackend(InferenceBackend::LIBTORCH);
+        } else if (newValue == 2.0f) {
+            inferenceManager.getInferenceThread().setBackend(InferenceBackend::ONNX);
+        }
+    }
 }
 
 //==============================================================================

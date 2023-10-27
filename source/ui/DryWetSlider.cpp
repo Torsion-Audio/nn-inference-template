@@ -1,6 +1,6 @@
 #include "DryWetSlider.h"
 
-DryWetSlider::DryWetSlider(juce::AudioProcessorValueTreeState &apvts) {
+DryWetSlider::DryWetSlider(juce::AudioProcessorValueTreeState &state) : apvts(state) {
     slider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     slider.setLookAndFeel(&customSliderLookAndFeel);

@@ -38,7 +38,7 @@ private:
     std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
     std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
-    std::atomic<InferenceBackend> currentBackend {TFLITE};
+    std::atomic<InferenceBackend> currentBackend {ONNX};
 
     juce::ListenerList<Listener> listeners;
 };

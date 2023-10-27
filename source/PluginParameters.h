@@ -18,7 +18,7 @@ public:
     ;
 
     inline static juce::StringArray backendTypes {"TFLITE", "LIBTORCH", "ONNXRUNTIME"};
-    inline static juce::String defaultBackend {"TFLITE"};
+    inline static juce::String defaultBackend {"ONNXRUNTIME"};
 
     static juce::StringArray getPluginParameterList();
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

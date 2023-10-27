@@ -7,12 +7,14 @@
 
 class DryWetSlider : public juce::Component {
 public:
-    DryWetSlider(juce::AudioProcessorValueTreeState& apvts);
+    DryWetSlider(juce::AudioProcessorValueTreeState& state);
     ~DryWetSlider() override;
 
     void resized() override;
 
 private:
+    juce::AudioProcessorValueTreeState& apvts;
+
     juce::Slider slider;
     CustomSliderLookAndFeel customSliderLookAndFeel;
 

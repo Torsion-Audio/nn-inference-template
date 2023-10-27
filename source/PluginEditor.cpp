@@ -3,7 +3,7 @@
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p), apvts(p.getValueTreeState()), dryWetSlider(apvts), backendSelector(apvts)
+    : AudioProcessorEditor (&p), processorRef (p), apvts(p.getValueTreeState()), dryWetSlider(p.getValueTreeState()), backendSelector(p.getValueTreeState())
 {
     juce::ignoreUnused (processorRef);
 
@@ -29,6 +29,7 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 {
     auto currentBound = getBounds();
     background->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::centred, 1.0f);
+    texture->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::centred, .25f);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
