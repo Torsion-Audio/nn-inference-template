@@ -32,8 +32,6 @@ void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
     } else {
         initSamples = (BATCH_SIZE * MODEL_INPUT_SIZE) + (int) spec.maximumBlockSize + MAX_INFERENCE_TIME + MODEL_LATENCY;
     }
-
-    calculateLatency((int) spec.maximumBlockSize);
 }
 
 void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
@@ -91,8 +89,8 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
     }
 }
 
-void InferenceManager::calculateLatency(int maxSamplesPerBuffer) {
-    // latencyInSamples = MODEL_INPUT_SIZE + MAX_INFERENCE_TIME + MODEL_LATENCY - maxSamplesPerBuffer;
+int InferenceManager::getLatency() {
+    return initSamples - (int) spec.maximumBlockSize;
 }
 
 int InferenceManager::getLatency() const {

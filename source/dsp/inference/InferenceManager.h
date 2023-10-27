@@ -18,10 +18,10 @@ public:
 
     int getLatency() const;
     InferenceThread &getInferenceThread();
+    int getLatency();
 
 private:
     void processOutput(juce::AudioBuffer<float>& buffer);
-    void calculateLatency(int maxSamplesPerBuffer);
 
 private:
     bool init = true;

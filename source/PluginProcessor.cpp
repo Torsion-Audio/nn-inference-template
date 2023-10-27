@@ -92,7 +92,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
     inferenceManager.prepareToPlay(spec);
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    setLatencySamples(inferenceManager.getLatency());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
