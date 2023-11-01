@@ -5,3 +5,4 @@ cmake-build*
 .idea
 .vscode
 codesign_and_copy.sh
+add_debug_entitlement.sh

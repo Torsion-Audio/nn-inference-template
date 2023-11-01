@@ -16,7 +16,6 @@ public:
 
     void parameterChanged(const juce::String &parameterID, float newValue);
 
-    int getLatency() const;
     InferenceThread &getInferenceThread();
     int getLatency();
 
@@ -35,7 +34,6 @@ private:
     std::atomic<int> numInferencedBufferAvailable;
     juce::dsp::ProcessSpec spec;
 
-    int latencyInSamples = 0;
     int inferenceCounter = 0;
 };
 

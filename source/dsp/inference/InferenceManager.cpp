@@ -90,11 +90,9 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
 }
 
 int InferenceManager::getLatency() {
-    return initSamples - (int) spec.maximumBlockSize;
-}
-
-int InferenceManager::getLatency() const {
-    return latencyInSamples;
+    int minimumLatency = initSamples - (int) spec.maximumBlockSize;
+    if (minimumLatency % (int) spec.maximumBlockSize == 0) return minimumLatency;
+    else return ((int) ((double) minimumLatency / (double) spec.maximumBlockSize) + 1) * (int) spec.maximumBlockSize;
 }
 
 InferenceThread &InferenceManager::getInferenceThread() {

@@ -94,10 +94,10 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
 
-    inferenceManager.prepareToPlay(spec);
+        inferenceManager.prepareToPlay(spec);
     dryWetMixer.prepare(spec);
-
     dryWetMixer.setWetLatency(inferenceManager.getLatency());
+    setLatencySamples(inferenceManager.getLatency());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
