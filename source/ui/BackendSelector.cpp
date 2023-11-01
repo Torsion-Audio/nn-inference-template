@@ -15,6 +15,10 @@ void BackendSelector::setBackend(int backendID) {
     }
 }
 
+InferenceBackend BackendSelector::getBackend() {
+    return currentBackend;
+}
+
 void BackendSelector::paint(juce::Graphics &g) {
     auto currentBound = getBounds();
 

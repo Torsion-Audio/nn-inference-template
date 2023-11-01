@@ -10,6 +10,7 @@ public:
     BackendSelector(juce::AudioProcessorValueTreeState& state);
 
     void setBackend(int backendID);
+    InferenceBackend getBackend();
 
     void paint(juce::Graphics& g) override;
     void resized() override;

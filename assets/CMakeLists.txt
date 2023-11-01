@@ -8,8 +8,14 @@
  juce_add_binary_data(BinaryData SOURCES
          graphics/background.png
          graphics/texture_overlay.png
+
          graphics/tflite_backend.png
          graphics/libtorch_backend.png
          graphics/onnx_backend.png
+
+         graphics/tflite_font.svg
+         graphics/libtorch_font.svg
+         graphics/onnx_font.svg
+
          graphics/highlight.png
  )
