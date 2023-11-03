@@ -44,6 +44,8 @@ void BackendSelector::paint(juce::Graphics &g) {
         case ONNX_HOVER:
             highlight->drawWithin(g, onnxHighlightBounds.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
             break;
+        case NONE:
+            break;
     }
 
     // Debug: Show hover hit boxes
