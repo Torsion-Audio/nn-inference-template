@@ -1,6 +1,7 @@
 #include "InferenceManager.h"
 
-InferenceManager::InferenceManager() {
+InferenceManager::InferenceManager() : inferenceThread(sendRingBuffer, receiveRingBuffer)
+{
 }
 
 InferenceManager::~InferenceManager() {
@@ -37,36 +38,17 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
         bufferCount += buffer.getNumSamples();
         if (bufferCount >= initSamples) init = false;
     }
+    processInput(buffer);
+    processOutput(buffer);
+}
+
+void InferenceManager::processInput(juce::AudioBuffer<float> &buffer) {
     // std::cout << "buffer.getNumSamples(): " << buffer.getNumSamples() << std::endl;
     // std::cout << "SendRingBuffer.getAvailableSamples(0): " << sendRingBuffer.getAvailableSamples(0) << std::endl;
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
     // std::cout << "SendRingBuffer.getAvailableSamples(0): " << sendRingBuffer.getAvailableSamples(0) << std::endl;
-    if (!inferenceThread.isInferenceRunning()) {
-        auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
-        // std::cout << "receiveBuffer.getAvailableSamples(0): " << receiveBuffer.getAvailableSamples(0) << std::endl;
-        // std::cout << "receiveRingBuffer.getAvailableSamples(0): " << receiveRingBuffer.getAvailableSamples(0) << std::endl;
-        while (receiveBuffer.getAvailableSamples(0) > 0) {
-                        receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
-        }
-        // std::cout << "receiveRingBuffer.getAvailableSamples(0): " << receiveRingBuffer.getAvailableSamples(0) << std::endl;
-        auto &sendBuffer = inferenceThread.getModelInputBuffer();
-        // std::cout << "sendRingBuffer.getAvailableSamples(0): " << sendRingBuffer.getAvailableSamples(0) << std::endl;
-        // std::cout << "sendBuffer.getAvailableSamples(0): " << sendBuffer.getAvailableSamples(0) << std::endl;
-        // add the available samples from the sendBuffer otherwise with if MODEL_INPUT_SIZE % spec.maximumBlockSize != 0 samples get stuck there
-        if (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0) >= (BATCH_SIZE * MODEL_INPUT_SIZE)) {
-            int rest = (sendRingBuffer.getAvailableSamples(0) + sendBuffer.getAvailableSamples(0)) % (BATCH_SIZE * MODEL_INPUT_SIZE);
-            while (sendRingBuffer.getAvailableSamples(0) > rest) {
-                sendBuffer.pushSample(sendRingBuffer.popSample(0), 0);
-            }
-            // std::cout << "sendBuffer.getAvailableSamples(0): " << sendBuffer.getAvailableSamples(0) << std::endl;
-            if (!inferenceThread.startInference()) {
-                std::cout << "Inference could not be started" << std::endl;
-            }
-        }
-    }
-    processOutput(buffer);
 }
 
 void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {

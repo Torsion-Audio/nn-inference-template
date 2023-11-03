@@ -6,7 +6,7 @@ void RingBuffer::initialise(int numChannels, int numSamples) {
     buffer.clear();
 
     for (int i = 0; i < numChannels; ++i) {
-    buffer.push_back(moodycamel::ReaderWriterQueue<float>((size_t) numSamples));
+        buffer.push_back(moodycamel::ReaderWriterQueue<float>((size_t) numSamples));
     }
 }
 

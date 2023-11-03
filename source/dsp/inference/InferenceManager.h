@@ -19,7 +19,12 @@ public:
     InferenceThread &getInferenceThread();
     int getLatency();
 
+    int getNumReceivedSamples() {
+        return receiveRingBuffer.getAvailableSamples(0);
+    }
+
 private:
+    void processInput(juce::AudioBuffer<float>& buffer);
     void processOutput(juce::AudioBuffer<float>& buffer);
 
 private:
@@ -28,10 +33,12 @@ private:
     int initSamples = 0;
 
     InferenceThread inferenceThread;
+
     RingBuffer sendRingBuffer;
     RingBuffer receiveRingBuffer;
 
     std::atomic<int> numInferencedBufferAvailable;
+
     juce::dsp::ProcessSpec spec;
 
     int inferenceCounter = 0;

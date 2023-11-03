@@ -11,8 +11,10 @@ public:
 
     void initialise(int numChannels, int numSamples);
     void reset();
+
     void pushSample(float sample, size_t channel);
     float popSample(size_t channel);
+
     int getAvailableSamples(size_t channel);
 
 private:

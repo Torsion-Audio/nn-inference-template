@@ -11,24 +11,15 @@
 
 class InferenceThread : private juce::Thread {
 public:
-    InferenceThread();
+    InferenceThread(RingBuffer& sendBuffer, RingBuffer& returnBuffer);
     ~InferenceThread() override;
 
     void prepareToPlay(const juce::dsp::ProcessSpec &spec);
     void setBackend(InferenceBackend backend);
 
-    RingBuffer& getModelInputBuffer();
-    RingBuffer& getModelOutputBuffer();
-
-    bool isInferenceRunning();
-    bool startInference();
-
-public:
-    std::atomic<bool> currentlyProcessing {false};
-    std::atomic<bool> processingShouldStart {false};
-
 private:
     void run() override;
+    void initInference();
     void inference();
     void processModel();
 
@@ -40,8 +31,9 @@ private:
     LibtorchProcessor torchProcessor;
     TFLiteProcessor tfliteProcessor;
 
-    RingBuffer rawModelInput;
-    RingBuffer processedModelOutput;
+    RingBuffer& sendRingBufferRef;
+    RingBuffer& receiveRingBufferRef;
+
     std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
     std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> processedModelInput;
 
