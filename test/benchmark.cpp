@@ -106,7 +106,7 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_ONNX_BACKEND)(benchmark::State& state
         pushSamplesInBuffer();
         state.ResumeTiming();
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isThreadRunning()){
+        while (plugin->getInferenceThread().isInferenceRunning()){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }
@@ -119,7 +119,7 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)(benchmark::State& s
         pushSamplesInBuffer();
         state.ResumeTiming();
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isThreadRunning()){
+        while (plugin->getInferenceThread().isInferenceRunning()){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }
@@ -132,7 +132,7 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_TFLITE_BACKEND)(benchmark::State& sta
         pushSamplesInBuffer();
         state.ResumeTiming();
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isThreadRunning()){
+        while (plugin->getInferenceThread().isInferenceRunning()){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }

@@ -62,6 +62,15 @@ include(cmake/SetupTensorflowLite.cmake)
 add_compile_definitions(MODELS_PATH_TENSORFLOW="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
 add_compile_definitions(MODELS_PATH_PYTORCH="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/pytorch-version/models/")
 
+include(FetchContent)
+
+FetchContent_Declare(
+    readerwriterqueue
+    GIT_REPOSITORY https://github.com/cameron314/readerwriterqueue
+    GIT_TAG v1.0.6)
+
+FetchContent_MakeAvailable(readerwriterqueue)
+
 # Add minimal examples
 add_subdirectory(minimal-inference)
 
@@ -138,6 +147,7 @@ target_link_libraries(${TARGET_NAME}
 		onnxruntime
 		torch
         tensorflowlite_c
+        readerwriterqueue
 		BinaryData
         juce::juce_audio_utils
         juce::juce_dsp
@@ -158,7 +168,6 @@ enable_testing()
 
 # TODO start and stop executable test
 # This module enables populating content at configure time via any method supported by the ExternalProject module. Whereas ExternalProject_Add() downloads at build time, the FetchContent module makes content available immediately, allowing the configure step to use the content in commands like add_subdirectory(), include() or file() operations.
-include(FetchContent)
 
 # Externally provided libraries
 FetchContent_Declare(googletest

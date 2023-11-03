@@ -2,6 +2,7 @@
 #define NN_INFERENCE_TEMPLATE_RINGBUFFER_H
 
 #include <JuceHeader.h>
+#include <readerwriterqueue.h>
 
 class RingBuffer
 {
@@ -10,13 +11,12 @@ public:
 
     void initialise(int numChannels, int numSamples);
     void reset();
-    void pushSample(float sample, int channel);
-    float popSample(int channel);
-    int getAvailableSamples(int channel);
+    void pushSample(float sample, size_t channel);
+    float popSample(size_t channel);
+    int getAvailableSamples(size_t channel);
 
 private:
-    juce::AudioBuffer<float> buffer;
-    std::vector<int> readPos, writePos;
+    std::vector<moodycamel::ReaderWriterQueue<float>> buffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RingBuffer)
 };

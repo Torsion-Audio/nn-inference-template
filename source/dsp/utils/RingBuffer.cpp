@@ -3,55 +3,37 @@
 RingBuffer::RingBuffer() = default;
 
 void RingBuffer::initialise(int numChannels, int numSamples) {
-    readPos.resize((size_t) numChannels);
-    writePos.resize((size_t) numChannels);
+    buffer.clear();
 
-    for (size_t i = 0; i < readPos.size(); i++) {
-        readPos[i] = 0;
-        writePos[i] = 0;
+    for (int i = 0; i < numChannels; ++i) {
+    buffer.push_back(moodycamel::ReaderWriterQueue<float>((size_t) numSamples));
     }
-
-    buffer.setSize(numChannels, numSamples);
 }
 
 void RingBuffer::reset() {
-    buffer.clear();
-
-    for (size_t i = 0; i < readPos.size(); i++) {
-        readPos[i] = 0;
-        writePos[i] = 0;
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        for (size_t j = 0; j < buffer[i].size_approx(); ++j) {
+            buffer[i].pop();
+        }
     }
 }
 
-void RingBuffer::pushSample(float sample, int channel) {
-    buffer.setSample(channel, writePos[(size_t) channel], sample);
-
-    ++writePos[(size_t) channel];
-
-    if (writePos[(size_t) channel] >= buffer.getNumSamples()) {
-        writePos[(size_t) channel] = 0;
+void RingBuffer::pushSample(float sample, size_t channel) {
+    if (!buffer[channel].try_enqueue(sample)) {
+        std::cout << "RingBuffer::pushSample: could not enqueue sample" << std::endl;
     }
 }
 
-float RingBuffer::popSample(int channel) {
-    auto sample = buffer.getSample(channel, readPos[(size_t) channel]);
-
-    ++readPos[(size_t) channel];
-
-    if (readPos[(size_t) channel] >= buffer.getNumSamples()) {
-        readPos[(size_t) channel] = 0;
-    }
-    return sample;
-}
-
-int RingBuffer::getAvailableSamples(int channel) {
-    int returnValue;
-
-    if (readPos[(size_t) channel] <= writePos[(size_t) channel]) {
-        returnValue = writePos[(size_t) channel] - readPos[(size_t) channel];
+float RingBuffer::popSample(size_t channel) {
+    float sample;
+    if(!buffer[channel].try_dequeue(sample)) {
+        std::cout << "RingBuffer::popSample: could not dequeue sample" << std::endl;
+        return 0.0f;
     } else {
-        returnValue = writePos[(size_t) channel] + buffer.getNumSamples() - readPos[(size_t) channel];
+        return sample;
     }
+}
 
-    return returnValue;
+int RingBuffer::getAvailableSamples(size_t channel) {
+    return buffer[channel].size_approx();
 }
