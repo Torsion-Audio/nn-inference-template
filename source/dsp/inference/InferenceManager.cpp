@@ -21,20 +21,25 @@ void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
 
     init = true;
     bufferCount = 0;
-    if ((int) spec.maximumBlockSize % (BATCH_SIZE * MODEL_INPUT_SIZE) != 0 && (int) spec.maximumBlockSize > (BATCH_SIZE * MODEL_INPUT_SIZE)) {
-        initSamples = (BATCH_SIZE * MODEL_INPUT_SIZE) + (2 * (int) spec.maximumBlockSize) + MAX_INFERENCE_TIME + MODEL_LATENCY;
+    int result = (int) spec.maximumBlockSize % (BATCH_SIZE * MODEL_INPUT_SIZE);
+    if (result == 0) {
+        initSamples = MAX_INFERENCE_TIME + BATCH_SIZE * MODEL_LATENCY;
+    } else if (result > 0 && result < (int) spec.maximumBlockSize) {
+        initSamples = MAX_INFERENCE_TIME + (int) spec.maximumBlockSize + BATCH_SIZE * MODEL_LATENCY; //TODO not minimum possible
     } else {
-        initSamples = (BATCH_SIZE * MODEL_INPUT_SIZE) + (int) spec.maximumBlockSize + MAX_INFERENCE_TIME + MODEL_LATENCY;
+        initSamples = MAX_INFERENCE_TIME + (BATCH_SIZE * MODEL_INPUT_SIZE) + BATCH_SIZE * MODEL_LATENCY;
     }
 }
 
 void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
+    processInput(buffer);
     if (init) {
         bufferCount += buffer.getNumSamples();
+        buffer.clear();
         if (bufferCount >= initSamples) init = false;
+    } else {
+        processOutput(buffer);
     }
-    processInput(buffer);
-    processOutput(buffer);
 }
 
 void InferenceManager::processInput(juce::AudioBuffer<float> &buffer) {
@@ -46,36 +51,32 @@ void InferenceManager::processInput(juce::AudioBuffer<float> &buffer) {
 
 void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
     buffer.clear();
-
-    if (!init) {
-        auto& receiveBuffer = inferenceThread.getReceiveBuffer();
-        while (inferenceCounter > 0) {
-            if (receiveBuffer.getAvailableSamples(0) >= 2 * buffer.getNumSamples()) {
-                for (int i = 0; i < buffer.getNumSamples(); ++i) {
-                    receiveBuffer.popSample(0);
-                }
-                inferenceCounter--;
+    auto& receiveBuffer = inferenceThread.getReceiveBuffer();
+    while (inferenceCounter > 0) {
+        if (receiveBuffer.getAvailableSamples(0) >= 2 * buffer.getNumSamples()) {
+            for (int i = 0; i < buffer.getNumSamples(); ++i) {
+                receiveBuffer.popSample(0);
             }
-            else {
-                break;
-            }
-        }
-        if (receiveBuffer.getAvailableSamples(0) >= buffer.getNumSamples()) {
-            for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-                buffer.setSample(0, sample, receiveBuffer.popSample(0));
-            }
+            inferenceCounter--;
         }
         else {
-            inferenceCounter++;
-            std::cout << "##### missing samples" << std::endl;
+            break;
         }
+    }
+    if (receiveBuffer.getAvailableSamples(0) >= buffer.getNumSamples()) {
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+            buffer.setSample(0, sample, receiveBuffer.popSample(0));
+        }
+    }
+    else {
+        inferenceCounter++;
+        std::cout << "##### missing samples" << std::endl;
     }
 }
 
 int InferenceManager::getLatency() {
-    int minimumLatency = initSamples - (int) spec.maximumBlockSize;
-    if (minimumLatency % (int) spec.maximumBlockSize == 0) return minimumLatency;
-    else return ((int) ((double) minimumLatency / (double) spec.maximumBlockSize) + 1) * (int) spec.maximumBlockSize;
+    if (initSamples % (int) spec.maximumBlockSize == 0) return initSamples;
+    else return ((int) ((float) initSamples / (float) spec.maximumBlockSize) + 1) * (int) spec.maximumBlockSize;
 }
 
 InferenceThread &InferenceManager::getInferenceThread() {

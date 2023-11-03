@@ -108,10 +108,11 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_ONNX_BACKEND)(benchmark::State& state
         pushSamplesInBuffer();
         state.ResumeTiming();
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+        bool init = plugin->getInferenceManager().isInitializing();
+        int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        if (plugin->getInferenceManager().isInitializing()) {
+        if (init) {
             while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
                 std::this_thread::sleep_for(std::chrono::nanoseconds (10));
             }
@@ -131,10 +132,11 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)(benchmark::State& s
         pushSamplesInBuffer();
         state.ResumeTiming();
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+        bool init = plugin->getInferenceManager().isInitializing();
+        int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        if (plugin->getInferenceManager().isInitializing()) {
+        if (init) {
             while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
                 std::this_thread::sleep_for(std::chrono::nanoseconds (10));
             }
@@ -154,10 +156,11 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_TFLITE_BACKEND)(benchmark::State& sta
         pushSamplesInBuffer();
         state.ResumeTiming();
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+        bool init = plugin->getInferenceManager().isInitializing();
+        int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        if (plugin->getInferenceManager().isInitializing()) {
+        if (init) {
             while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
                 std::this_thread::sleep_for(std::chrono::nanoseconds (10));
             }
