@@ -6,7 +6,7 @@
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p), apvts(p.getValueTreeState()), dryWetSlider(p.getValueTreeState()), backendSelector(p.getValueTreeState())
+    : AudioProcessorEditor (&p), processorRef (p), backendSelector(p.getValueTreeState()), dryWetSlider(p.getValueTreeState()), apvts(p.getValueTreeState())
 {
     juce::ignoreUnused (processorRef);
 
