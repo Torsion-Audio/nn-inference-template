@@ -1,6 +1,7 @@
 #include "InferenceThread.h"
 
 InferenceThread::InferenceThread() : juce::Thread("InferenceThread") {
+    startThread(juce::Thread::Priority::highest);
 }
 
 InferenceThread::~InferenceThread() {
@@ -26,16 +27,41 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
     tfliteProcessor.prepareToPlay();
 }
 
+bool InferenceThread::isInferenceRunning() {
+    return (currentlyProcessing.load() && processingShouldStart.load());
+}
+
+bool InferenceThread::startInference() {
+    if (isInferenceRunning()) {
+        return false;
+    } else {
+        processingShouldStart.store(true);
+        return true;
+    }
+}
+
+
 void InferenceThread::run() {
-    auto start = std::chrono::high_resolution_clock::now();
-        inference();
+    while (!threadShouldExit()) {
+        std::this_thread::sleep_for(std::chrono::microseconds(35));
+        if (processingShouldStart.load()) {
+            currentlyProcessing.store(true);
+            processingShouldStart.store(false);
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            auto start = std::chrono::high_resolution_clock::now();
 
-    processingTime.store(duration.count());
+            inference();
 
-    // std::cout << "Inference took " << duration.count() << "ms" << std::endl;
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            processingTime.store((float) duration.count());
+
+            // std::cout << "Inference took " << duration.count() << "ms" << std::endl;
+
+
+            currentlyProcessing.store(false);
+        }
+    }
 }
 
 void InferenceThread::inference() {
@@ -90,3 +116,4 @@ RingBuffer& InferenceThread::getModelOutputBuffer() {
 void InferenceThread::setBackend(InferenceBackend backend) {
     currentBackend.store(backend);
 }
+

@@ -1,11 +1,9 @@
 #include "InferenceManager.h"
 
 InferenceManager::InferenceManager() {
-    // inferenceThread.addInferenceListener(this);
 }
 
 InferenceManager::~InferenceManager() {
-    // inferenceThread.removeInferenceListener(this);
 }
 
 void InferenceManager::parameterChanged(const juce::String &parameterID, float newValue) {
@@ -42,7 +40,7 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
         sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
-    if (!inferenceThread.isThreadRunning()) {
+    if (!inferenceThread.isInferenceRunning()) {
         auto &receiveBuffer = inferenceThread.getModelOutputBuffer();
         while (receiveBuffer.getAvailableSamples(0) > 0) {
                         receiveRingBuffer.pushSample(receiveBuffer.popSample(0), 0);
@@ -54,8 +52,9 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
             while (sendRingBuffer.getAvailableSamples(0) > rest) {
                 sendBuffer.pushSample(sendRingBuffer.popSample(0), 0);
             }
-            if (!inferenceThread.startThread(juce::Thread::Priority::highest)) {
-                std::cout << "Inference thread could not be started" << std::endl;
+
+            if (!inferenceThread.startInference()) {
+                std::cout << "Inference could not be started" << std::endl;
             }
         }
     }

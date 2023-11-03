@@ -10,16 +10,24 @@
 #include "backends/TFLiteProcessor.h"
 // #include "processors/WindowingProcessor.h"
 
-class InferenceThread : public juce::Thread {
+class InferenceThread : private juce::Thread {
 public:
     InferenceThread();
     ~InferenceThread() override;
 
     void prepareToPlay(const juce::dsp::ProcessSpec &spec);
     void setBackend(InferenceBackend backend);
+
     RingBuffer& getModelInputBuffer();
     RingBuffer& getModelOutputBuffer();
-    
+
+    bool isInferenceRunning();
+    bool startInference();
+
+public:
+    std::atomic<bool> currentlyProcessing {false};
+    std::atomic<bool> processingShouldStart {false};
+
 private:
     void run() override;
     void inference();

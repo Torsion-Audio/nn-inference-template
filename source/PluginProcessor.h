@@ -5,7 +5,6 @@
 
 #include "PluginParameters.h"
 #include "dsp/utils/Mixer.h"
-#include "dsp/utils/InferenceThread.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, private juce::AudioProcessorValueTreeState::Listener
