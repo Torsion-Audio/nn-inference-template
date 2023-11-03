@@ -1,13 +1,13 @@
-#ifndef NN_INFERENCE_TEMPLATE_RINGBUFFER_H
-#define NN_INFERENCE_TEMPLATE_RINGBUFFER_H
+#ifndef NN_INFERENCE_TEMPLATE_THREADSAFEBUFFER_H
+#define NN_INFERENCE_TEMPLATE_THREADSAFEBUFFER_H
 
 #include <JuceHeader.h>
 #include <readerwriterqueue.h>
 
-class RingBuffer
+class ThreadSafeBuffer
 {
 public:
-    RingBuffer();
+    ThreadSafeBuffer();
 
     void initialise(int numChannels, int numSamples);
     void reset();
@@ -20,7 +20,7 @@ public:
 private:
     std::vector<moodycamel::ReaderWriterQueue<float>> buffer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RingBuffer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadSafeBuffer)
 };
 
-#endif //NN_INFERENCE_TEMPLATE_RINGBUFFER_H
+#endif //NN_INFERENCE_TEMPLATE_THREADSAFEBUFFER_H
