@@ -3,6 +3,8 @@
 #include "../source/PluginEditor.h"
 #include "utils/TestThread.h"
 
+// TODO Make sure that benchmarks also work when HOST_BUFFER_SIZE % MODEL_INPUT_SIZE != 0
+
 /* ============================================================ *
  * ===================== Helper functions ===================== *
  * ============================================================ */
@@ -106,12 +108,18 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_ONNX_BACKEND)(benchmark::State& state
         pushSamplesInBuffer();
         state.ResumeTiming();
 
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
-
-        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
-            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        if (plugin->getInferenceManager().isInitializing()) {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
+        }
+        else {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
         }
     }
 }
@@ -123,12 +131,18 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)(benchmark::State& s
         pushSamplesInBuffer();
         state.ResumeTiming();
 
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
-
-        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
-            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        if (plugin->getInferenceManager().isInitializing()) {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
+        }
+        else {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
         }
     }
 }
@@ -140,12 +154,18 @@ BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_TFLITE_BACKEND)(benchmark::State& sta
         pushSamplesInBuffer();
         state.ResumeTiming();
 
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
         plugin->processBlock(*buffer, *midiBuffer);
 
-        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
-
-        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
-            std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+        if (plugin->getInferenceManager().isInitializing()) {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples + plugin->getBlockSize()){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
+        }
+        else {
+            while (plugin->getInferenceManager().getNumReceivedSamples() < prevNumReceivedSamples){
+                std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+            }
         }
     }
 }
@@ -228,13 +248,13 @@ BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_TFLITE_BACKEND)
   })
 ->DisplayAggregatesOnly(true);
 
-BENCHMARK_REGISTER_F(ThreadFixture, BM_THREAD)
-->Unit(benchmark::kMillisecond)
-->Iterations(1)->Repetitions(128)
-->ComputeStatistics("min", [](const std::vector<double>& v) -> double {
-    return *(std::min_element(std::begin(v), std::end(v)));
-  })
-->ComputeStatistics("max", [](const std::vector<double>& v) -> double {
-    return *(std::max_element(std::begin(v), std::end(v)));
-  })
-->DisplayAggregatesOnly(true);
+// BENCHMARK_REGISTER_F(ThreadFixture, BM_THREAD)
+// ->Unit(benchmark::kMillisecond)
+// ->Iterations(1)->Repetitions(128)
+// ->ComputeStatistics("min", [](const std::vector<double>& v) -> double {
+//     return *(std::min_element(std::begin(v), std::end(v)));
+//   })
+// ->ComputeStatistics("max", [](const std::vector<double>& v) -> double {
+//     return *(std::max_element(std::begin(v), std::end(v)));
+//   })
+// ->DisplayAggregatesOnly(true);
