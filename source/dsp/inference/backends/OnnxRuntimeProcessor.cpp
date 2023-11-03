@@ -13,12 +13,12 @@ void OnnxRuntimeProcessor::prepareToPlay() {
     // Define the shape of input tensor
     inputShape = MODEL_INPUT_SHAPE_ONNX;
     // first run takes longest, so we do it here
-    std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> input;
-    std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> output;
+    NNInferenceTemplate::InputArray input;
+    NNInferenceTemplate::OutputArray output;
     processBlock(input, output);
 }
 
-void OnnxRuntimeProcessor::processBlock(std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>& output) {
+void OnnxRuntimeProcessor::processBlock(NNInferenceTemplate::InputArray& input, NNInferenceTemplate::OutputArray& output) {
 
     // Create input tensor object from input data values and shape
     const Ort::Value inputTensor = Ort::Value::CreateTensor<float>  (memory_info,

@@ -34,8 +34,8 @@ private:
     RingBuffer& sendRingBufferRef;
     RingBuffer& receiveRingBufferRef;
 
-    std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND> rawModelOutputBuffer;
-    std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND> processedModelInput;
+    NNInferenceTemplate::OutputArray rawModelOutputBuffer;
+    NNInferenceTemplate::InputArray processedModelInput;
 
     std::atomic<InferenceBackend> currentBackend {ONNX};
 

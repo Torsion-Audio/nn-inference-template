@@ -33,4 +33,9 @@ enum InferenceBackend {
 
 #define MODEL_LATENCY 0
 
+namespace NNInferenceTemplate {
+    using InputArray = std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>;
+    using OutputArray = std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>;
+}
+
 #endif //NN_INFERENCE_TEMPLATE_INFERENCECONFIG_H

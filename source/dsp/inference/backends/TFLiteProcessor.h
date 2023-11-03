@@ -11,7 +11,7 @@ public:
     ~TFLiteProcessor();
 
     void prepareToPlay();
-    void processBlock(std::array<float, BATCH_SIZE * MODEL_INPUT_SIZE_BACKEND>& input, std::array<float, BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND>& output);
+    void processBlock(NNInferenceTemplate::InputArray& input, NNInferenceTemplate::OutputArray& output);
 
 private:
     std::string filepath = MODELS_PATH_TENSORFLOW;
