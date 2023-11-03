@@ -4,7 +4,7 @@
 #include <JuceHeader.h>
 
 #include "InferenceThread.h"
-#include "../utils/RingBuffer.h"
+#include "../utils/ThreadSafeBuffer.h"
 
 class InferenceManager {
 public:
@@ -20,7 +20,11 @@ public:
     int getLatency();
 
     int getNumReceivedSamples() {
-        return receiveRingBuffer.getAvailableSamples(0);
+        return inferenceThread.getReceiveBuffer().getAvailableSamples(0);
+    }
+
+    bool isInitializing() {
+        return init;
     }
 
 private:
@@ -33,11 +37,6 @@ private:
     int initSamples = 0;
 
     InferenceThread inferenceThread;
-
-    RingBuffer sendRingBuffer;
-    RingBuffer receiveRingBuffer;
-
-    std::atomic<int> numInferencedBufferAvailable;
 
     juce::dsp::ProcessSpec spec;
 

@@ -1,7 +1,6 @@
 #include "InferenceManager.h"
 
-InferenceManager::InferenceManager() : inferenceThread(sendRingBuffer, receiveRingBuffer)
-{
+InferenceManager::InferenceManager() {
 }
 
 InferenceManager::~InferenceManager() {
@@ -16,10 +15,6 @@ void InferenceManager::parameterChanged(const juce::String &parameterID, float n
 
 void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
     spec = const_cast<juce::dsp::ProcessSpec &>(newSpec);
-    numInferencedBufferAvailable.store(0);
-
-    sendRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
-    receiveRingBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the ringbuffer need to be?
 
     inferenceThread.prepareToPlay(spec);
     inferenceCounter = 0;
@@ -43,22 +38,21 @@ void InferenceManager::processBlock(juce::AudioBuffer<float> &buffer) {
 }
 
 void InferenceManager::processInput(juce::AudioBuffer<float> &buffer) {
-    // std::cout << "buffer.getNumSamples(): " << buffer.getNumSamples() << std::endl;
-    // std::cout << "SendRingBuffer.getAvailableSamples(0): " << sendRingBuffer.getAvailableSamples(0) << std::endl;
+    auto& sendBuffer = inferenceThread.getSendBuffer();
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-        sendRingBuffer.pushSample(buffer.getSample(0, sample), 0);
+        sendBuffer.pushSample(buffer.getSample(0, sample), 0);
     }
-    // std::cout << "SendRingBuffer.getAvailableSamples(0): " << sendRingBuffer.getAvailableSamples(0) << std::endl;
 }
 
 void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
     buffer.clear();
 
     if (!init) {
+        auto& receiveBuffer = inferenceThread.getReceiveBuffer();
         while (inferenceCounter > 0) {
-            if (receiveRingBuffer.getAvailableSamples(0) >= 2 * buffer.getNumSamples()) {
+            if (receiveBuffer.getAvailableSamples(0) >= 2 * buffer.getNumSamples()) {
                 for (int i = 0; i < buffer.getNumSamples(); ++i) {
-                    receiveRingBuffer.popSample(0);
+                    receiveBuffer.popSample(0);
                 }
                 inferenceCounter--;
             }
@@ -66,9 +60,9 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
                 break;
             }
         }
-        if (receiveRingBuffer.getAvailableSamples(0) >= buffer.getNumSamples()) {
+        if (receiveBuffer.getAvailableSamples(0) >= buffer.getNumSamples()) {
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-                buffer.setSample(0, sample, receiveRingBuffer.popSample(0));
+                buffer.setSample(0, sample, receiveBuffer.popSample(0));
             }
         }
         else {

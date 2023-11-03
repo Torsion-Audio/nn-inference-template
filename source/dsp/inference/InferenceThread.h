@@ -3,7 +3,7 @@
 
 #include <JuceHeader.h>
 
-#include "../utils/RingBuffer.h"
+#include "../utils/ThreadSafeBuffer.h"
 #include "InferenceConfig.h"
 #include "backends/OnnxRuntimeProcessor.h"
 #include "backends/LibtorchProcessor.h"
@@ -11,35 +11,34 @@
 
 class InferenceThread : private juce::Thread {
 public:
-    InferenceThread(RingBuffer& sendBuffer, RingBuffer& returnBuffer);
+    InferenceThread();
     ~InferenceThread() override;
 
     void prepareToPlay(const juce::dsp::ProcessSpec &spec);
     void setBackend(InferenceBackend backend);
 
+    ThreadSafeBuffer& getSendBuffer();
+    ThreadSafeBuffer& getReceiveBuffer();
+
 private:
     void run() override;
-    void initInference();
     void inference();
     void processModel();
 
 private:
-    size_t maxInferencesPerBlock = 0;
     std::atomic<float> processingTime;
 
     OnnxRuntimeProcessor onnxProcessor;
     LibtorchProcessor torchProcessor;
     TFLiteProcessor tfliteProcessor;
 
-    RingBuffer& sendRingBufferRef;
-    RingBuffer& receiveRingBufferRef;
+    ThreadSafeBuffer sendBuffer;
+    ThreadSafeBuffer receiveBuffer;
 
     NNInferenceTemplate::OutputArray rawModelOutputBuffer;
     NNInferenceTemplate::InputArray processedModelInput;
 
     std::atomic<InferenceBackend> currentBackend {ONNX};
-
-    juce::ListenerList<Listener> listeners;
 };
 
 #endif //NN_INFERENCE_TEMPLATE_INFERENCETHREAD_H

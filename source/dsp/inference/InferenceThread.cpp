@@ -1,8 +1,6 @@
 #include "InferenceThread.h"
 
-InferenceThread::InferenceThread(RingBuffer& sendBuffer, RingBuffer& returnBuffer) : juce::Thread("InferenceThread"),
-                                                                                     sendRingBufferRef(sendBuffer),
-                                                                                     receiveRingBufferRef(returnBuffer)
+InferenceThread::InferenceThread() : juce::Thread("InferenceThread")
 {
 }
 
@@ -11,11 +9,13 @@ InferenceThread::~InferenceThread() {
 }
 
 void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
+    if (isThreadRunning()) stopThread(100);
+
+    sendBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the buffer need to be?
+    receiveBuffer.initialise(1, (int) spec.sampleRate * 6); // TODO how big does the buffer need to be?
+
     std::fill(processedModelInput.begin(), processedModelInput.end(), 0.f);
     std::fill(rawModelOutputBuffer.begin(), rawModelOutputBuffer.end(), 0.f);
-
-    // TODO think about calculate maxInferencesPerBlock
-    maxInferencesPerBlock = std::max((unsigned int) 1, (spec.maximumBlockSize / (BATCH_SIZE * MODEL_INPUT_SIZE)) + 1);
 
     onnxProcessor.prepareToPlay();
     torchProcessor.prepareToPlay();
@@ -29,50 +29,31 @@ void InferenceThread::run() {
     while (!threadShouldExit()) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
 
-        if (sendRingBufferRef.getAvailableSamples(0) >= (BATCH_SIZE * MODEL_INPUT_SIZE)) {
-            initInference();
+        if (sendBuffer.getAvailableSamples(0) >= (BATCH_SIZE * MODEL_INPUT_SIZE)) {
+            inference();
         }
     }
 }
 
-void InferenceThread::initInference() {
-    auto start = std::chrono::high_resolution_clock::now();
-
-    inference();
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = (float) std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    processingTime.store(duration);
-
-    // std::cout << "Inference took " << duration.count() << "ms" << std::endl;
-}
-
 void InferenceThread::inference() {
+    // pre-processing
+    for (size_t batch = 0; batch < BATCH_SIZE; batch++) {
+        size_t baseIdx = batch * MODEL_INPUT_SIZE_BACKEND;
+        size_t prevBaseIdx = (batch == 0 ? BATCH_SIZE - 1 : batch - 1) * MODEL_INPUT_SIZE_BACKEND;
 
-    size_t numInferences = (size_t) (sendRingBufferRef.getAvailableSamples(0) / (MODEL_INPUT_SIZE * BATCH_SIZE));
-    numInferences = std::min(numInferences, maxInferencesPerBlock);
-
-    for (size_t i = 0; i < numInferences; i++) {
-
-        // pre-processing
-        for (size_t batch = 0; batch < BATCH_SIZE; batch++) {
-            size_t baseIdx = batch * MODEL_INPUT_SIZE_BACKEND;
-            size_t prevBaseIdx = (batch == 0 ? BATCH_SIZE - 1 : batch - 1) * MODEL_INPUT_SIZE_BACKEND;
-
-            for (size_t j = 1; j < MODEL_INPUT_SIZE_BACKEND; j++) {
-                processedModelInput[baseIdx + j - 1] = processedModelInput[prevBaseIdx + j];
-            }
-
-            processedModelInput[baseIdx + MODEL_INPUT_SIZE_BACKEND - 1] = sendRingBufferRef.popSample(0);
+        for (size_t j = 1; j < MODEL_INPUT_SIZE_BACKEND; j++) {
+            processedModelInput[baseIdx + j - 1] = processedModelInput[prevBaseIdx + j];
         }
 
-        // actual inference
-        processModel();
+        processedModelInput[baseIdx + MODEL_INPUT_SIZE_BACKEND - 1] = sendBuffer.popSample(0);
+    }
 
-        // post-processing
-        for (size_t j = 0; j < BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND; j++) {
-            receiveRingBufferRef.pushSample(rawModelOutputBuffer[j], 0);
-        }
+    // actual inference
+    processModel();
+
+    // post-processing
+    for (size_t j = 0; j < BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND; j++) {
+        receiveBuffer.pushSample(rawModelOutputBuffer[j], 0);
     }
 }
 
@@ -90,3 +71,10 @@ void InferenceThread::setBackend(InferenceBackend backend) {
     currentBackend.store(backend);
 }
 
+ThreadSafeBuffer& InferenceThread::getSendBuffer() {
+    return sendBuffer;
+}
+
+ThreadSafeBuffer& InferenceThread::getReceiveBuffer() {
+    return receiveBuffer;
+}
