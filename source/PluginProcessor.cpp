@@ -196,6 +196,6 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new AudioPluginAudioProcessor();
 }
 
-InferenceThread &AudioPluginAudioProcessor::getInferenceThread() {
-    return inferenceManager.getInferenceThread();
+InferenceManager &AudioPluginAudioProcessor::getInferenceManager() {
+    return inferenceManager;
 }

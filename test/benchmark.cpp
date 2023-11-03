@@ -100,39 +100,51 @@ void ProcessBlockFixture::SetUp(const ::benchmark::State& state) {
 }
 
 BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_ONNX_BACKEND)(benchmark::State& state) {
-    plugin->getInferenceThread().setBackend(ONNX);
+    plugin->getInferenceManager().getInferenceThread().setBackend(ONNX);
     for (auto _ : state) {
         state.PauseTiming();
         pushSamplesInBuffer();
         state.ResumeTiming();
+
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isInferenceRunning()){
+
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+
+        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }
 }
 
 BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)(benchmark::State& state) {
-    plugin->getInferenceThread().setBackend(LIBTORCH);
+    plugin->getInferenceManager().getInferenceThread().setBackend(LIBTORCH);
     for (auto _ : state) {
         state.PauseTiming();
         pushSamplesInBuffer();
         state.ResumeTiming();
+
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isInferenceRunning()){
+
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+
+        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }
 }
 
 BENCHMARK_DEFINE_F(ProcessBlockFixture, BM_TFLITE_BACKEND)(benchmark::State& state) {
-    plugin->getInferenceThread().setBackend(TFLITE);
+    plugin->getInferenceManager().getInferenceThread().setBackend(TFLITE);
     for (auto _ : state) {
         state.PauseTiming();
         pushSamplesInBuffer();
         state.ResumeTiming();
+
         plugin->processBlock(*buffer, *midiBuffer);
-        while (plugin->getInferenceThread().isInferenceRunning()){
+
+        const int prevNumReceivedSamples = plugin->getInferenceManager().getNumReceivedSamples();
+
+        while (plugin->getInferenceManager().getNumReceivedSamples() == prevNumReceivedSamples){
             std::this_thread::sleep_for(std::chrono::nanoseconds (10));
         }
     }

@@ -46,7 +46,8 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    InferenceThread &getInferenceThread();
+    InferenceManager &getInferenceManager();
+
     juce::AudioProcessorValueTreeState& getValueTreeState() { return parameters; }
 
 private:
