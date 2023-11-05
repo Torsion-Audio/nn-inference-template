@@ -16,30 +16,24 @@ public:
 
     void parameterChanged(const juce::String &parameterID, float newValue);
 
-    InferenceThread &getInferenceThread();
     int getLatency();
 
-    int getNumReceivedSamples() {
-        return inferenceThread.getReceiveBuffer().getAvailableSamples(0);
-    }
-
-    bool isInitializing() {
-        return init;
-    }
+    // Required for unit test
+    int getNumReceivedSamples();
+    bool isInitializing();
+    InferenceThread &getInferenceThread();
 
 private:
     void processInput(juce::AudioBuffer<float>& buffer);
     void processOutput(juce::AudioBuffer<float>& buffer);
 
 private:
+    InferenceThread inferenceThread;
+    juce::dsp::ProcessSpec spec;
+
     bool init = true;
     int bufferCount = 0;
     int initSamples = 0;
-
-    InferenceThread inferenceThread;
-
-    juce::dsp::ProcessSpec spec;
-
     int inferenceCounter = 0;
 };
 

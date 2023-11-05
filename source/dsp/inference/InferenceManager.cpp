@@ -21,6 +21,7 @@ void InferenceManager::prepareToPlay(const juce::dsp::ProcessSpec &newSpec) {
 
     init = true;
     bufferCount = 0;
+
     int result = (int) spec.maximumBlockSize % (BATCH_SIZE * MODEL_INPUT_SIZE);
     if (result == 0) {
         initSamples = MAX_INFERENCE_TIME + BATCH_SIZE * MODEL_LATENCY;
@@ -50,7 +51,6 @@ void InferenceManager::processInput(juce::AudioBuffer<float> &buffer) {
 }
 
 void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
-    buffer.clear();
     auto& receiveBuffer = inferenceThread.getReceiveBuffer();
     while (inferenceCounter > 0) {
         if (receiveBuffer.getAvailableSamples(0) >= 2 * buffer.getNumSamples()) {
@@ -69,6 +69,7 @@ void InferenceManager::processOutput(juce::AudioBuffer<float> &buffer) {
         }
     }
     else {
+        buffer.clear();
         inferenceCounter++;
         std::cout << "##### missing samples" << std::endl;
     }
@@ -81,4 +82,12 @@ int InferenceManager::getLatency() {
 
 InferenceThread &InferenceManager::getInferenceThread() {
     return inferenceThread;
+}
+
+int InferenceManager::getNumReceivedSamples() {
+    return inferenceThread.getReceiveBuffer().getAvailableSamples(0);
+}
+
+bool InferenceManager::isInitializing() {
+    return init;
 }

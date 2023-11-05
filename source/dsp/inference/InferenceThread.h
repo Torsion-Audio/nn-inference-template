@@ -22,8 +22,11 @@ public:
 
 private:
     void run() override;
+    void process();
+
+    void preProcess();
     void inference();
-    void processModel();
+    void postProcess();
 
 private:
     std::atomic<float> processingTime;

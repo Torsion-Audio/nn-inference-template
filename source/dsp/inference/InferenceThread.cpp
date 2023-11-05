@@ -21,22 +21,27 @@ void InferenceThread::prepareToPlay(const juce::dsp::ProcessSpec &spec) {
     torchProcessor.prepareToPlay();
     tfliteProcessor.prepareToPlay();
 
-    // Start inference after first allocation
+    // Start inference after first memory allocation
     if (!isThreadRunning()) startThread(juce::Thread::Priority::highest);
 }
 
 void InferenceThread::run() {
     while (!threadShouldExit()) {
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
-
         if (sendBuffer.getAvailableSamples(0) >= (BATCH_SIZE * MODEL_INPUT_SIZE)) {
-            inference();
+            process();
+        } else {
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
     }
 }
 
-void InferenceThread::inference() {
-    // pre-processing
+void InferenceThread::process() {
+    preProcess();
+    inference();
+    postProcess();
+}
+
+void InferenceThread::preProcess() {
     for (size_t batch = 0; batch < BATCH_SIZE; batch++) {
         size_t baseIdx = batch * MODEL_INPUT_SIZE_BACKEND;
         size_t prevBaseIdx = (batch == 0 ? BATCH_SIZE - 1 : batch - 1) * MODEL_INPUT_SIZE_BACKEND;
@@ -47,23 +52,21 @@ void InferenceThread::inference() {
 
         processedModelInput[baseIdx + MODEL_INPUT_SIZE_BACKEND - 1] = sendBuffer.popSample(0);
     }
-
-    // actual inference
-    processModel();
-
-    // post-processing
-    for (size_t j = 0; j < BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND; j++) {
-        receiveBuffer.pushSample(rawModelOutputBuffer[j], 0);
-    }
 }
 
-void InferenceThread::processModel() {
+void InferenceThread::inference() {
     if (currentBackend == ONNX) {
         onnxProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
     } else if (currentBackend == LIBTORCH) {
         torchProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
     } else if (currentBackend == TFLITE) {
         tfliteProcessor.processBlock(processedModelInput, rawModelOutputBuffer);
+    }
+}
+
+void InferenceThread::postProcess() {
+    for (size_t j = 0; j < BATCH_SIZE * MODEL_OUTPUT_SIZE_BACKEND; j++) {
+        receiveBuffer.pushSample(rawModelOutputBuffer[j], 0);
     }
 }
 

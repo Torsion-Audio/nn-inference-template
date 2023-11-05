@@ -26,7 +26,7 @@ enum InferenceBackend {
 
 
 #if WIN32
-#define MAX_INFERENCE_TIME 8192
+#define MAX_INFERENCE_TIME 16384
 #else
 #define MAX_INFERENCE_TIME 256
 #endif
