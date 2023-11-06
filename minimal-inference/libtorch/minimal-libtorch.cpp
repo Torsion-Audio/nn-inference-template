@@ -15,9 +15,9 @@ int main(int argc, const char* argv[]) {
     std::cout << "Minimal LibTorch example:" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
 
-    int batchSize = 2;
-    int modelInputSize = 150;
-    int modelOutputSize = 1;
+    const int batchSize = 2;
+    const int modelInputSize = 150;
+    const int modelOutputSize = 1;
 
     std::string filepath = MODELS_PATH_PYTORCH;
     const std::string modelpath = filepath + "model_0/model_0-minimal.pt";
@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "Output shape 1: " << outputTensor.sizes()[1] << '\n';
 
     // Extract the output tensor data
-    int outputSize = batchSize * modelOutputSize;
+    const int outputSize = batchSize * modelOutputSize;
     float outputData[outputSize];
 
     for (int i = 0; i < outputSize; i++) {

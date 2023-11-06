@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Minimal TensorFlow-Lite example:" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
 
-    int batchSize = 2;
-    int modelInputSize = 150;
-    int modelOutputSize = 1;
+    const int batchSize = 2;
+    const int modelInputSize = 150;
+    const int modelOutputSize = 1;
 
     std::string filepath = MODELS_PATH_TENSORFLOW;
     std::string modelpath = filepath + "model_0/model_0-minimal.tflite";
