@@ -13,9 +13,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Minimal OnnxRuntime example:" << std::endl;
     std::cout << "-----------------------------------------" << std::endl;
 
-    int batchSize = 2;
-    int modelInputSize = 150;
-    int modelOutputSize = 1;
+    const int batchSize = 2;
+    const int modelInputSize = 150;
+    const int modelOutputSize = 1;
 
     bool tflite = true;
     bool libtorch = true;
@@ -87,9 +87,10 @@ int main(int argc, char* argv[]) {
 
         // Define output vector
         int outputSize = batchSize * modelOutputSize;
-        float* outputData;
-        outputData = new float[outputSize];
-        outputData = outputTensors[0].GetTensorMutableData<float>();
+        float* outputData = new float[outputSize];
+
+        const float* tensorData = outputTensors[0].GetTensorData<float>();
+        std::memcpy(outputData, tensorData, outputSize * sizeof(float));
 
         // Extract the output tensor data
         for (int i = 0; i < outputSize; i++) {
@@ -167,9 +168,10 @@ int main(int argc, char* argv[]) {
 
         // Define output vector
         int outputSize = batchSize * modelOutputSize;
-        float* outputData;
-        outputData = new float[outputSize];
-        outputData = outputTensors[0].GetTensorMutableData<float>();
+        float* outputData = new float[outputSize];
+
+        const float* tensorData = outputTensors[0].GetTensorData<float>();
+        std::memcpy(outputData, tensorData, outputSize * sizeof(float));
 
         // Extract the output tensor data
         for (int i = 0; i < outputSize; i++) {
