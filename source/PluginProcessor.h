@@ -1,10 +1,11 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-#include "dsp/inference/InferenceManager.h"
 
 #include "PluginParameters.h"
 #include "dsp/utils/Mixer.h"
+#include "dsp/utils/MonoStereo.h"
+#include "dsp/inference/InferenceManager.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, private juce::AudioProcessorValueTreeState::Listener
@@ -54,9 +55,11 @@ private:
 
 private:
     juce::AudioProcessorValueTreeState parameters;
+    juce::AudioBuffer<float> monoBuffer;
 
     InferenceManager inferenceManager;
     Mixer dryWetMixer;
+    MonoStereo monoStereoProcessor;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)

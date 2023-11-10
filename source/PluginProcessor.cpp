@@ -90,16 +90,19 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::dsp::ProcessSpec spec {sampleRate,
+    juce::dsp::ProcessSpec monoSpec {sampleRate,
                                  static_cast<juce::uint32>(samplesPerBlock),
-                                 static_cast<juce::uint32>(getTotalNumInputChannels())};
+                                 static_cast<juce::uint32>(1)};
 
-    inferenceManager.prepareToPlay(spec);
-    dryWetMixer.prepare(spec);
+    dryWetMixer.prepare(monoSpec);
+
+    monoBuffer.setSize(1, samplesPerBlock);
+    inferenceManager.prepareToPlay(monoSpec);
 
     auto newLatency = inferenceManager.getLatency();
     dryWetMixer.setWetLatency(newLatency);
     setLatencySamples(newLatency);
+
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -144,14 +147,13 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    dryWetMixer.setDrySamples(buffer);
-    inferenceManager.processBlock(buffer);
+    monoStereoProcessor.stereoToMono(monoBuffer, buffer);
+    dryWetMixer.setDrySamples(monoBuffer);
 
-    for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-        buffer.setSample(1, sample, buffer.getSample(0, sample));
-    }
+    inferenceManager.processBlock(monoBuffer);
 
-    dryWetMixer.setWetSamples(buffer);
+    dryWetMixer.setWetSamples(monoBuffer);
+    monoStereoProcessor.monoToStereo(buffer, monoBuffer);
 }
 
 //==============================================================================
