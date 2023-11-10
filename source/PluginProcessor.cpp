@@ -20,6 +20,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
+    for (auto & parameterID : PluginParameters::getPluginParameterList()) {
+        parameters.removeParameterListener(parameterID, this);
+    }
 }
 
 //==============================================================================
@@ -185,11 +188,11 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 
 void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID, float newValue) {
     if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
-        InferenceBackend newInferenceBackend = (newValue == 0.0f) ? TFLITE :
-                                               (newValue == 1.f) ? LIBTORCH : ONNX;
-        inferenceManager.getInferenceThread().setBackend(newInferenceBackend);
+    InferenceBackend newInferenceBackend = (newValue == 0.0f) ? TFLITE :
+    (newValue == 1.f) ? LIBTORCH : ONNX;
+    inferenceManager.getInferenceThread().setBackend(newInferenceBackend);
     } else if (parameterID == PluginParameters::DRY_WET_ID.getParamID()) {
-        dryWetMixer.setDryWetProportion(newValue);
+    dryWetMixer.setDryWetProportion(newValue);
     }
 }
 

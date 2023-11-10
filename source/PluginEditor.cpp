@@ -27,6 +27,9 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 {
+    for (auto & parameterID : PluginParameters::getPluginParameterList()) {
+        apvts.removeParameterListener(parameterID, this);
+    }
 }
 
 //==============================================================================
@@ -72,6 +75,5 @@ void AudioPluginAudioProcessorEditor::resized()
 void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue) {
     if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
         backendSelector.setBackend(static_cast<int>(newValue));
-        repaint();
     }
 }
