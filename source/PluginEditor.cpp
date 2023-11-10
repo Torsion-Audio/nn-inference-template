@@ -74,6 +74,14 @@ void AudioPluginAudioProcessorEditor::resized()
 
 void AudioPluginAudioProcessorEditor::parameterChanged(const juce::String &parameterID, float newValue) {
     if (parameterID == PluginParameters::BACKEND_TYPE_ID.getParamID()) {
-        backendSelector.setBackend(static_cast<int>(newValue));
+        if (juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+            backendSelector.setBackend(static_cast<int>(newValue));
+            repaint();
+        } else {
+            juce::MessageManager::callAsync( [this, newValue] {
+                backendSelector.setBackend(static_cast<int>(newValue));
+                repaint();
+            } );
+        }
     }
 }

@@ -11,11 +11,7 @@ void BackendSelector::setBackend(int backendID) {
 
     if (newBackend != currentBackend) {
         currentBackend = newBackend;
-        if (juce::MessageManager::getInstance()->isThisTheMessageThread()) {
-            repaint();
-        } else {
-            juce::MessageManager::callAsync( [this] { repaint(); } );
-        }
+        repaint();
     }
 }
 
