@@ -87,17 +87,12 @@ int main(int argc, char* argv[]) {
 
         // Define output vector
         int outputSize = batchSize * modelOutputSize;
-        float* outputData = new float[outputSize];
-
-        const float* tensorData = outputTensors[0].GetTensorData<float>();
-        std::memcpy(outputData, tensorData, outputSize * sizeof(float));
+        const float* outputData = outputTensors[0].GetTensorData<float>();
 
         // Extract the output tensor data
         for (int i = 0; i < outputSize; i++) {
             std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
-
-        delete[] outputData;
     }
 
     if (libtorch) {
@@ -168,16 +163,11 @@ int main(int argc, char* argv[]) {
 
         // Define output vector
         int outputSize = batchSize * modelOutputSize;
-        float* outputData = new float[outputSize];
-
-        const float* tensorData = outputTensors[0].GetTensorData<float>();
-        std::memcpy(outputData, tensorData, outputSize * sizeof(float));
+        const float* outputData = outputTensors[0].GetTensorData<float>();
 
         // Extract the output tensor data
         for (int i = 0; i < outputSize; i++) {
             std::cout << "Output data [" << i << "]: " << outputData[i] << std::endl;
         }
-
-        delete[] outputData;
     }
 }
