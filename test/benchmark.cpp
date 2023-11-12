@@ -255,10 +255,10 @@ BENCHMARK_DEFINE_F(ThreadFixture, BM_THREAD)(benchmark::State& state) {
 
 BENCHMARK(BM_PROCESSOR)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_EDITOR)->Unit(benchmark::kMillisecond);
-//
+
 BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_ONNX_BACKEND)
 ->Unit(benchmark::kMillisecond)
-->Iterations(1)->Repetitions(5000)
+->Iterations(1)->Repetitions(10000)
 ->RangeMultiplier(2)->Range(128, 8<<10)
 ->ComputeStatistics("min", calculateMin)
 ->ComputeStatistics("max", calculateMax)
@@ -269,7 +269,7 @@ BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_ONNX_BACKEND)
 
 BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)
 ->Unit(benchmark::kMillisecond)
-->Iterations(1)->Repetitions(5000)
+->Iterations(1)->Repetitions(10000)
 ->RangeMultiplier(2)->Range(128, 8<<10)
 ->ComputeStatistics("min", calculateMin)
 ->ComputeStatistics("max", calculateMax)
@@ -280,7 +280,7 @@ BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_LIBTORCH_BACKEND)
 
 BENCHMARK_REGISTER_F(ProcessBlockFixture, BM_TFLITE_BACKEND)
 ->Unit(benchmark::kMillisecond)
-->Iterations(1)->Repetitions(5000)
+->Iterations(1)->Repetitions(10000)
 ->RangeMultiplier(2)->Range(128, 8<<10)
 ->ComputeStatistics("min", calculateMin)
 ->ComputeStatistics("max", calculateMax)
