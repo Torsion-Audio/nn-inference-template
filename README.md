@@ -50,9 +50,8 @@ ctest -VV
 
 Once the the test finished, all test details can be found: `cmake-build-release\Test\Temporary\LastTest.log`
 
-# License
-
 ## Licenses
+
 The primary license for the code of this project is the MIT license, but be aware of the licenses of the submodules:
  - The *GuitarLSTM* fork located at ```modules/GuitarLSTM/``` is licensed under the [GPLv3](https://github.com/GuitarML/GuitarLSTM/blob/main/LICENSE.txt)
  - The *JUCE* library located at ```modules/JUCE/``` is licensed under the [JUCE License](https://github.com/juce-framework/JUCE/blob/master/LICENSE.md)
