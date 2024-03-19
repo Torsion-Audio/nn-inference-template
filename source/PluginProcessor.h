@@ -1,11 +1,11 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include <JuceHeader.h>
+#include <anira/anira.h>
 
 #include "PluginParameters.h"
-#include "dsp/utils/Mixer.h"
-#include "dsp/utils/MonoStereo.h"
-#include "dsp/inference/InferenceManager.h"
+#include "ModelConfig.h"
+#include "ModelPrePostProcessor.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, private juce::AudioProcessorValueTreeState::Listener
@@ -47,19 +47,23 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    InferenceManager &getInferenceManager();
+    anira::InferenceManager &getInferenceManager();
     juce::AudioProcessorValueTreeState& getValueTreeState() { return parameters; }
 
 private:
     void parameterChanged (const juce::String& parameterID, float newValue) override;
+    void stereoToMono(juce::AudioBuffer<float> &targetMonoBlock, juce::AudioBuffer<float> &sourceBlock);
+    void monoToStereo(juce::AudioBuffer<float> &targetStereoBlock, juce::AudioBuffer<float> &sourceBlock);
 
 private:
     juce::AudioProcessorValueTreeState parameters;
     juce::AudioBuffer<float> monoBuffer;
 
-    InferenceManager inferenceManager;
-    Mixer dryWetMixer;
-    MonoStereo monoStereoProcessor;
+    anira::InferenceConfig inferenceConfig = hybridNNConfig;
+    HybridNNPrePostProcessor prePostProcessor;
+    anira::InferenceHandler inferenceHandler;
+
+    juce::dsp::DryWetMixer<float> dryWetMixer;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)

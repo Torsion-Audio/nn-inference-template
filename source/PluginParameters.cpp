@@ -9,10 +9,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginParameters::createPara
                                                                     backendTypes,
                                                                     backendTypes.indexOf(defaultBackend)));
 
-    params.push_back (std::make_unique<juce::AudioParameterBool>   (WINDOWING_ENABLED_ID,
-                                                                    WINDOWING_ENABLED_NAME,
-                                                                    true));
-
     params.push_back( std::make_unique<juce::AudioParameterFloat>  (DRY_WET_ID,
                                                                     DRY_WET_NAME,
                                                                     dryWetRange,
