@@ -2,15 +2,15 @@
 #define NN_INFERENCE_TEMPLATE_BACKENDSELECTOR_H
 
 #include <JuceHeader.h>
+#include <anira/anira.h>
 #include "../PluginParameters.h"
-#include "../dsp/inference/InferenceConfig.h"
 
 class BackendSelector : public juce::Component {
 public:
     BackendSelector(juce::AudioProcessorValueTreeState& state);
 
     void setBackend(int backendID);
-    InferenceBackend getBackend();
+    anira::InferenceBackend getBackend();
 
     void paint(juce::Graphics& g) override;
     void resized() override;
@@ -25,8 +25,8 @@ private:
     int getCurrentBackendID();
     void getNextBackend();
 
-    InferenceBackend stringToBackend(juce::String& backendStr);
-    juce::String backendToString(InferenceBackend backend);
+    anira::InferenceBackend stringToBackend(juce::String& backendStr);
+    juce::String backendToString(anira::InferenceBackend backend);
 
 private:
     juce::AudioProcessorValueTreeState& apvts;
@@ -45,7 +45,7 @@ private:
     juce::Rectangle<int> onnxHighlightBounds;
 
     juce::StringArray backendList;
-    InferenceBackend currentBackend;
+    anira::InferenceBackend currentBackend;
 
     enum BackendHover {
         NONE,

@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "PluginEditor.h"
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor() 
@@ -176,7 +177,7 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new AudioPluginAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -202,13 +203,16 @@ void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID
         const auto paramInt = static_cast<int>(newValue);
         auto paramString = PluginParameters::backendTypes.getReference(paramInt);
 #ifdef USE_TFLITE
-        if (paramString == "TFLITE") inferenceHandler.setInferenceBackend(anira::TFLITE);
+        if (paramString == "TFLITE") {inferenceHandler.setInferenceBackend(anira::TFLITE);
+        std::cout << "TFLITE" << std::endl;}
 #endif
 #ifdef USE_ONNXRUNTIME
-        if (paramString == "ONNXRUNTIME") inferenceHandler.setInferenceBackend(anira::ONNX);
+        if (paramString == "ONNXRUNTIME") {inferenceHandler.setInferenceBackend(anira::ONNX);
+        std::cout << "ONNXRUNTIME" << std::endl;}
 #endif
 #ifdef USE_LIBTORCH
-        if (paramString == "LIBTORCH") inferenceHandler.setInferenceBackend(anira::LIBTORCH);
+        if (paramString == "LIBTORCH") {inferenceHandler.setInferenceBackend(anira::LIBTORCH);
+        std::cout << "LIBTORCH" << std::endl;}
 #endif
         if (paramString == "NONE") inferenceHandler.setInferenceBackend(anira::NONE);
     }

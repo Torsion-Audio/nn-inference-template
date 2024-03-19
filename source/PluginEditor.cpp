@@ -42,13 +42,13 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
     auto currentBackend = backendSelector.getBackend();
 
     switch (currentBackend) {
-        case TFLITE:
+        case anira::TFLITE:
             tfliteFont->drawWithin(g, fontBounds.toFloat(), juce::RectanglePlacement::doNotResize, 1.0f);
             break;
-        case LIBTORCH:
+        case anira::LIBTORCH:
             libtorchFont->drawWithin(g, fontBounds.toFloat(), juce::RectanglePlacement::doNotResize, 1.0f);
             break;
-        case ONNX:
+        case anira::ONNX:
             onnxFont->drawWithin(g, fontBounds.toFloat(), juce::RectanglePlacement::doNotResize, 1.0f);
             break;
         default:

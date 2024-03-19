@@ -15,7 +15,7 @@ void BackendSelector::setBackend(int backendID) {
     }
 }
 
-InferenceBackend BackendSelector::getBackend() {
+anira::InferenceBackend BackendSelector::getBackend() {
     return currentBackend;
 }
 
@@ -23,13 +23,13 @@ void BackendSelector::paint(juce::Graphics &g) {
     auto currentBound = getBounds();
 
     switch (currentBackend) {
-        case InferenceBackend::TFLITE:
+        case anira::TFLITE:
             backendTFLite->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
             break;
-        case InferenceBackend::LIBTORCH:
+        case anira::LIBTORCH:
             backendLibTorch->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
             break;
-        case InferenceBackend::ONNX:
+        case anira::ONNX:
             backendONNX->drawWithin(g, currentBound.toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);
             break;
     }
@@ -93,11 +93,11 @@ void BackendSelector::mouseMove(const juce::MouseEvent &event) {
 void BackendSelector::mouseDown(const juce::MouseEvent &event) {
     auto pos = event.getPosition();
     if ( libtorchBounds.contains(pos) ) {
-        currentBackend = InferenceBackend::LIBTORCH;
+        currentBackend = anira::LIBTORCH;
     } else if ( tfliteBounds.contains(pos) ) {
-        currentBackend = InferenceBackend::TFLITE;
+        currentBackend = anira::TFLITE;
     } else if ( onnxBounds.contains(pos) ) {
-        currentBackend = InferenceBackend::ONNX;
+        currentBackend = anira::ONNX;
     } else {
         getNextBackend();
     }
@@ -119,32 +119,32 @@ int BackendSelector::getCurrentBackendID() {
 
 void BackendSelector::getNextBackend() {
     switch (currentBackend) {
-        case InferenceBackend::TFLITE:
-            currentBackend = InferenceBackend::LIBTORCH;
+        case anira::TFLITE:
+            currentBackend = anira::LIBTORCH;
             break;
-        case InferenceBackend::LIBTORCH:
-            currentBackend = InferenceBackend::ONNX;
+        case anira::LIBTORCH:
+            currentBackend = anira::ONNX;
             break;
-        case InferenceBackend::ONNX:
-            currentBackend = InferenceBackend::TFLITE;
+        case anira::ONNX:
+            currentBackend = anira::TFLITE;
             break;
     }
 }
 
-InferenceBackend BackendSelector::stringToBackend(juce::String &backendStr) {
-    if (backendStr == "TFLITE") return InferenceBackend::TFLITE;
-    if (backendStr == "LIBTORCH") return InferenceBackend::LIBTORCH;
-    if (backendStr == "ONNXRUNTIME") return InferenceBackend::ONNX;
+anira::InferenceBackend BackendSelector::stringToBackend(juce::String &backendStr) {
+    if (backendStr == "TFLITE") return anira::TFLITE;
+    if (backendStr == "LIBTORCH") return anira::LIBTORCH;
+    if (backendStr == "ONNXRUNTIME") return anira::ONNX;
     throw std::invalid_argument("Invalid backend string");
 }
 
-juce::String BackendSelector::backendToString(InferenceBackend backend) {
+juce::String BackendSelector::backendToString(anira::InferenceBackend backend) {
     switch (backend) {
-        case InferenceBackend::TFLITE:
+        case anira::TFLITE:
             return "TFLITE";
-        case InferenceBackend::LIBTORCH:
+        case anira::LIBTORCH:
             return "LIBTORCH";
-        case InferenceBackend::ONNX:
+        case anira::ONNX:
             return "ONNXRUNTIME";
         default:
             return "";
