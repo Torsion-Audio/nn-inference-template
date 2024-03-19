@@ -18,6 +18,9 @@ project (${PROJECT_NAME} VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# This disables the default behavior of adding all targets to the CTest dashboard, when adding libraries with the fetchcontent module
+set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+
 # ==============================================================================
 # Add the anira library
 # ==============================================================================
@@ -37,14 +40,19 @@ add_subdirectory(modules/JUCE)
 
 # ==============================================================================
 
+set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
+set(GUITARLSTM_MODELS_PATH_PYTORCH "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/pytorch-version/models/")
+
+add_compile_definitions(
+        GUITARLSTM_MODELS_PATH_TENSORFLOW="${GUITARLSTM_MODELS_PATH_TENSORFLOW}"
+        GUITARLSTM_MODELS_PATH_PYTORCH="${GUITARLSTM_MODELS_PATH_PYTORCH}"
+)
+
 if(APPLE)
 	set(FORMATS_TO_BUILD AU VST3 Standalone)
 else()
 	set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
-
-add_compile_definitions(MODELS_PATH_TENSORFLOW="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
-add_compile_definitions(MODELS_PATH_PYTORCH="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/pytorch-version/models/")
 
 # Include the assets and common directories
 add_subdirectory(assets)
