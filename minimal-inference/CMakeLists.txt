@@ -1,3 +1,0 @@
-add_subdirectory(tensorflow-lite)
-add_subdirectory(libtorch)
-add_subdirectory(onnxruntime)
