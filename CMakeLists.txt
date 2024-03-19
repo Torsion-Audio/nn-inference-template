@@ -14,17 +14,22 @@ set (PROJECT_NAME nn-inference-template)
 
 project (${PROJECT_NAME} VERSION 0.0.1)
 
-option(BUILD_ARCHITECTURE "Architecture to build for")
-
 # Sets the cpp language minimum
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Export only public symbols
-# We set this option for all our libraries since the google benchmark lib are setup with hidden visibility
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+# ==============================================================================
+# Add the anira library
+# ==============================================================================
 
+# add the anira library
+add_subdirectory(modules/anira)
+
+# ==============================================================================
+# Add the JUCE library
+# ==============================================================================
+
+add_subdirectory(modules/JUCE)
 
 # ==============================================================================
 
@@ -32,47 +37,14 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 # ==============================================================================
 
-# Compilation options
-if(NOT CMAKE_BUILD_TYPE)
-	message(FATAL_ERROR "No build type selected, please specify Debug or Release with -DCMAKE_BUILD_TYPE=<type>")
-else()
-	message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-endif()
-
-if(APPLE AND (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF))
+if(APPLE)
 	set(FORMATS_TO_BUILD AU VST3 Standalone)
-elseif(APPLE AND NOT BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
-    set(FORMATS_TO_BUILD AU Standalone)
 else()
 	set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
 
-# Juce is included via a submodule
-add_subdirectory(modules/JUCE)
-
-# Install inference engines
-
-# ONNXRuntime
-include(cmake/SetupOnnxRuntime.cmake)
-# LibTorch
-include(cmake/SetupLibTorch.cmake)
-# TensorflowLite
-include(cmake/SetupTensorflowLite.cmake)
-
 add_compile_definitions(MODELS_PATH_TENSORFLOW="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
 add_compile_definitions(MODELS_PATH_PYTORCH="${CMAKE_SOURCE_DIR}/modules/GuitarLSTM/pytorch-version/models/")
-
-include(FetchContent)
-
-FetchContent_Declare(
-    readerwriterqueue
-    GIT_REPOSITORY https://github.com/cameron314/readerwriterqueue
-    GIT_TAG v1.0.6)
-
-FetchContent_MakeAvailable(readerwriterqueue)
-
-# Add minimal examples
-add_subdirectory(minimal-inference)
 
 # Include the assets and common directories
 add_subdirectory(assets)
@@ -94,6 +66,8 @@ juce_add_plugin(${TARGET_NAME}
 		PLUGIN_CODE Nnit                            # A unique four-character plugin id with exactly one upper-case character
 		# GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 
+        VST3_AUTO_MANIFEST FALSE
+
 		if(APPLE)
             HARDENED_RUNTIME_ENABLED TRUE
             HARDENED_RUNTIME_OPTIONS "com.apple.security.device.audio-input"
@@ -109,13 +83,6 @@ juce_generate_juce_header(${TARGET_NAME})
 
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)
-
-## For now remove unused dsp files
-#file(GLOB_RECURSE SOURCES_DSP CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/dsp/*.h)
-#foreach(SOURCE ${SOURCES_DSP})
-#    list(REMOVE_ITEM SOURCES ${SOURCE})
-#endforeach()
-
 
 # Add all sources to target
 target_sources(${TARGET_NAME} PRIVATE ${SOURCES})
@@ -144,10 +111,7 @@ target_compile_definitions(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME}
     PRIVATE
-		onnxruntime
-		torch
-        tensorflowlite_c
-        readerwriterqueue
+        anira::anira
 		BinaryData
         juce::juce_audio_utils
         juce::juce_dsp
@@ -164,9 +128,10 @@ target_link_libraries(${TARGET_NAME}
 # ==============================================================================
 
 # enable ctest
-enable_testing()
+include(CTest)
 
-# TODO start and stop executable test
+include(FetchContent)
+
 # This module enables populating content at configure time via any method supported by the ExternalProject module. Whereas ExternalProject_Add() downloads at build time, the FetchContent module makes content available immediately, allowing the configure step to use the content in commands like add_subdirectory(), include() or file() operations.
 
 # Externally provided libraries
@@ -195,7 +160,7 @@ if(NOT benchmark_POPULATED)
     # Set custom variables, policies, etc.
     set(BENCHMARK_ENABLE_TESTING OFF)
 
-    if (APPLE AND (BUILD_ARCHITECTURE STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+    if (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
     set(HAVE_STD_REGEX ON)
     set(RUN_HAVE_STD_REGEX 1)
     endif()
@@ -239,7 +204,7 @@ target_include_directories(Test_${TARGET_NAME} SYSTEM PRIVATE $<TARGET_PROPERTY:
 # include Loads and runs CMake code from the file given. Loads and runs CMake code from the file given.
 include(GoogleTest)
 
-if (BUILD_ARCHITECTURE STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR OR BUILD_ARCHITECTURE STREQUAL OFF)
+if (CMAKE_OSX_ARCHITECTURES STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
     # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
     gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 90)
 endif ()
