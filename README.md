@@ -1,6 +1,6 @@
 #  A Template Audio Plugin for Real-time Neural Network Inference
 
-> This repository was started as a companion repository to the [talk](sched.co/1Pufm) **Real-time inference of neural networks: a practical approach for DSP engineers** at the Audio Developer Conference 2023.
+> This repository was started as a companion repository to the talk **Real-time inference of neural networks: a practical approach for DSP engineers** at the Audio Developer Conference 2023. The video can be found [here](https://www.youtube.com/watch?v=z_RKgHU59r0).
 
 > Since the conference, we have continued to refine and extend the codebase. For more flexible and easier use of the inference architecture, we have consolidated this work into a library called [anira](https://github.com/tu-studio/anira), which is now used in this repository. For those interested in the state of the repository as presented at ADC23, it can be found under the tag [ADC23-talk](https://github.com/Torsion-Audio/nn-inference-template/tree/ADC23-talk).
 
