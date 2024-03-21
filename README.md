@@ -1,6 +1,8 @@
-#  Neural Network Inference Template for Real-Time Cricital Audio Environments
+#  A Template Audio Plugin for Real-time Neural Network Inference
 
-> This is a companion repository for the presentation **Real-time inference of neural networks: a practical approach for DSP engineers** at the Audio Developer Conference 2023.
+> This repository was started as a companion repository to the [talk](sched.co/1Pufm) **Real-time inference of neural networks: a practical approach for DSP engineers** at the Audio Developer Conference 2023.
+
+> Since the conference, we have continued to refine and extend the codebase. For more flexible and easier use of the inference architecture, we have consolidated this work into a library called [anira](https://github.com/tu-studio/anira), which is now used in this repository. For those interested in the state of the repository as presented at ADC23, it can be found under the tag [ADC23-talk](https://github.com/Torsion-Audio/nn-inference-template/tree/ADC23-talk).
 
 > Authors: **Valentin Ackva** & **Fares Schulz**
 
@@ -8,12 +10,13 @@
 
 ![mockup](assets/graphics/mockup.png)
 
-This repository provides a comprehensive template and practical guide for implementing neural network inference within real-time audio processing environments. For this, we utilize three common inference engines:
+This repository provides a comprehensive JUCE plugin template that demonstrates the use of [anira](https://github.com/tu-studio/anira) to implement neural network inference in real-time audio applications. In this template, we use all three inference engines currently supported by the library:
+
 - TensorFlow Lite
 - LibTorch
 - ONNXRuntime.
 
-It covers crucial aspects of maintaining real-time safety and ensuring a seamless signal flow. We delve into the delicate balance between latency, performance, and stability.
+[anira](https://github.com/tu-studio/anira), an architecture for neural network inference in real-time audio applications, covers all critical aspects of ensuring real-time safety and seamless signal flow for real-time inference. Detailed information can be found on the library's [github repo](https://github.com/tu-studio/anira).
 
 ## Build instruction
 
@@ -37,28 +40,17 @@ cmake --build cmake-build-release --config Release
 
 ## Unit Test / Benchmark
 
-To benchmark your plugin across different audio configuratioans and inference backends, you can use our test:
-
-```bash
-# make shure all submodules are installed
-
-# use cmake to build the test
-make . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
-cmake --build cmake-build-release --target Test_NN_Inference_Template --config Release
-
-# start the test
-cd cmake-build-release
-ctest -VV
-```
-
-Once the the test finished, all test details can be found: `cmake-build-release\Test\Temporary\LastTest.log`
+The previous unit test for benchmarking the plugin performance across different audio configurations and inference backends is replaced by the benchmarking options within [anira](https://github.com/tu-studio/anira). These new benchmarks have been improved in many ways and provide a range of simple to complex benchmarks that can be used to compare the inference time for different models, inference engines, and audio configurations.
 
 ## Licenses
 
 The primary license for the code of this project is the MIT license, but be aware of the licenses of the submodules:
- - The *GuitarLSTM* fork located at ```modules/GuitarLSTM/``` is licensed under the [GPLv3](https://github.com/GuitarML/GuitarLSTM/blob/main/LICENSE.txt)
- - The *JUCE* library located at ```modules/JUCE/``` is licensed under the [JUCE License](https://github.com/juce-framework/JUCE/blob/master/LICENSE.md)
- - The *ONNXRuntime* library  at ```modules/onnxruntime-1.15.1/``` is licensed under the [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE)
- - The *Libtorch* library at ```modules/libtorch-2.0.1/``` is licensed under the [Modified BSD](https://github.com/pytorch/pytorch/blob/main/LICENSE)
- - The *TensorflowLite* library at ```modules/tensorflowlite-2.14.0``` is licensed under the [Apache 2.0](https://github.com/tensorflow/tensorflow/blob/master/LICENSE)
+
+
+ - The *anira* library is licensed under the [Apache 2.0](https://github.com/tensorflow/tensorflow/blob/master/LICENSE)
+ - The *GuitarLSTM* fork is licensed under the [GPLv3](https://github.com/GuitarML/GuitarLSTM/blob/main/LICENSE.txt)
+ - The *JUCE* library is licensed under the [JUCE License](https://github.com/juce-framework/JUCE/blob/master/LICENSE.md)
+ - The *ONNXRuntime* library is licensed under the [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE)
+ - The *Libtorch* library is licensed under the [Modified BSD](https://github.com/pytorch/pytorch/blob/main/LICENSE)
+ - The *TensorflowLite* library is licensed under the [Apache 2.0](https://github.com/tensorflow/tensorflow/blob/master/LICENSE)
  - All other code within this project is licensed under the MIT License.
