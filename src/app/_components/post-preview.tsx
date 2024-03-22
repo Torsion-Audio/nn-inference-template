@@ -38,7 +38,7 @@ export function PostPreview({
         ) : (
           // Render internal link for other cases
           <Link href="/posts/[slug]" as={`/posts/${slug}`}>
-          //  <a className="hover:underline">{title}</a>
+            <a className="hover:underline">{title}</a>
           </Link>
         )}
       </h3>
