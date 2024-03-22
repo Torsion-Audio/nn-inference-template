@@ -10,7 +10,7 @@ type Props = {
 
 const CoverImageNoBg = ({ title, src, slug }: Props) => {
     return (
-        <div className="sm:mx-0">
+        <div>
           <Image
             src={src}
             alt={`Cover Image for ${title}`}
