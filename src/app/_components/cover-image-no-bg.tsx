@@ -14,7 +14,7 @@ const CoverImageNoBg = ({ title, src, slug }: Props) => {
           <Image
             src={src}
             alt={`Cover Image for ${title}`}
-            className="shadow-sm w-full"
+            className="w-full"
             width={1300}
             height={630}
           />
