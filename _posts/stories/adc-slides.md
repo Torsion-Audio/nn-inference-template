@@ -1,13 +1,13 @@
 ---
 title: "ADC23 Talk: Inspect Slides"
 excerpt: "Check out the slides from our ADC23 talk to dive into the details of our implementation, methods, and architecture."
-coverImage: "/nextjs-website-test/assets/blog/resources/adc-slides.png"
+coverImage: "/nn-inference-template/assets/blog/resources/adc-slides.png"
 date: "2020-03-16T05:35:06.322Z"
 author:
   name: Joe Haddad
-  picture: "/nextjs-website-test/assets/blog/authors/joe.jpeg"
+  picture: "/nn-inference-template/assets/blog/authors/joe.jpeg"
 ogImage:
-  url: "/nextjs-website-test/assets/blog/resources/adc-slides.png"
+  url: "/nn-inference-template/assets/blog/resources/adc-slides.png"
 ---
 
 

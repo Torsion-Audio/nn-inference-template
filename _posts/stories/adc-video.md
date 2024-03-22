@@ -1,13 +1,13 @@
 ---
 title: "ADC23 Talk: Watch Video"
 excerpt: "Watch the full video of our talk at ADC23 to learn how to implement neural network inference in real-time audio applications."
-coverImage: "/nextjs-website-test/assets/blog/resources/adc-video.png"
+coverImage: "/nn-inference-template/assets/blog/resources/adc-video.png"
 date: "2020-03-16T05:35:07.322Z"
 author:
   name: Joe Haddad
-  picture: "/nextjs-website-test/assets/blog/authors/joe.jpeg"
+  picture: "/nn-inference-template/assets/blog/authors/joe.jpeg"
 ogImage:
-  url: "/nextjs-website-test/assets/blog/resources/adc-video.png"
+  url: "/nn-inference-template/assets/blog/resources/adc-video.png"
 ---
 
 

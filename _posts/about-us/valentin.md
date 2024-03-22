@@ -1,13 +1,13 @@
 ---
 title: "Valentin Ackva"
 excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Praesent elementum facilisis leo vel fringilla est ullamcorper eget. At imperdiet dui accumsan sit amet nulla facilities morbi tempus."
-coverImage: "/nextjs-website-test/assets/blog/authors/valentin.png"
+coverImage: "/nn-inference-template/assets/blog/authors/valentin.png"
 date: "2020-03-16T05:37:07.322Z"
 author:
   name: Valentin Ackva
-  picture: "/nextjs-website-test/assets/blog/authors/jj.jpeg"
+  picture: "/nn-inference-template/assets/blog/authors/jj.jpeg"
 ogImage:
-  url: "/nextjs-website-test/assets/blog/authors/valentin.png"
+  url: "/nn-inference-template/assets/blog/authors/valentin.png"
 ---
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Praesent elementum facilisis leo vel fringilla est ullamcorper eget. At imperdiet dui accumsan sit amet nulla facilities morbi tempus. Praesent elementum facilisis leo vel fringilla. Congue mauris rhoncus aenean vel. Egestas sed tempus urna et pharetra pharetra massa massa ultricies.
