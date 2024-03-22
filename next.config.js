@@ -9,8 +9,8 @@ const nextConfig = {
   },
 
   // Set the base path and asset prefix to match the GitHub Pages subpath
-  basePath: '/nextjs-website-test',
-  assetPrefix: '/nextjs-website-test/',
+  basePath: '/nn-inference-template/',
+  assetPrefix: '/nn-inference-template/',
 
   // Optional configurations:
   // Enable trailing slashes in URLs. 
