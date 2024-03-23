@@ -8,7 +8,7 @@ export function PostBody({ content }: Props) {
   return (
     <div className="max-w-2xl mx-auto">
       <div
-        className="markdown"
+        className={markdownStyles["markdown"]}
         dangerouslySetInnerHTML={{ __html: content }}
       />
       <iframe 
@@ -16,8 +16,6 @@ export function PostBody({ content }: Props) {
         frameBorder="0" 
         width="1440" 
         height="839" 
-        allowFullScreen={true} 
-        mozallowfullscreen="true" 
         webkitallowfullscreen="true">
       </iframe>
     </div>
