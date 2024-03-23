@@ -25,8 +25,11 @@ set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 # Add the anira library
 # ==============================================================================
 
-# add the anira library
+# Either add the anira library as a git submodule and use add_subdirectory
 add_subdirectory(modules/anira)
+# Or download the latest release from github and the folder to the cmake prefix path and use find_package
+# list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/modules/anira-x.x.x")
+# find_package(anira REQUIRED)
 
 # ==============================================================================
 # Add the JUCE library
@@ -128,91 +131,3 @@ target_link_libraries(${TARGET_NAME}
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
-
-# ==============================================================================
-
-# Test setup
-
-# ==============================================================================
-
-# enable ctest
-include(CTest)
-
-include(FetchContent)
-
-# This module enables populating content at configure time via any method supported by the ExternalProject module. Whereas ExternalProject_Add() downloads at build time, the FetchContent module makes content available immediately, allowing the configure step to use the content in commands like add_subdirectory(), include() or file() operations.
-
-# Externally provided libraries
-FetchContent_Declare(googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW TRUE
-    GIT_TAG v1.14.0)
-
-FetchContent_Declare(benchmark
-    GIT_REPOSITORY https://github.com/google/benchmark.git
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW TRUE
-    GIT_TAG v1.8.3)
-
-# This command ensures that each of the named dependencies are made available to the project by the time it returns. If the dependency has already been populated the command does nothing. Otherwise, the command populates the dependency and then calls add_subdirectory() on the result.
-FetchContent_MakeAvailable(googletest)
-
-# For benchmark we want to set the BENCMARK_ENABLE_TESTING to OFF therefore we cannot use FetchContent_MakeAvailable()
-# Check if population has already been performed
-FetchContent_GetProperties(benchmark)
-if(NOT benchmark_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(benchmark)
-
-    # Set custom variables, policies, etc.
-    set(BENCHMARK_ENABLE_TESTING OFF)
-
-    if (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
-    set(HAVE_STD_REGEX ON)
-    set(RUN_HAVE_STD_REGEX 1)
-    endif()
-
-    # Bring the populated content into the build
-    add_subdirectory(${benchmark_SOURCE_DIR} ${benchmark_BINARY_DIR})
-
-    # Supress warnings by making include directories system directories
-    get_property(BENCHMARK_INCLUDE_DIRS TARGET benchmark PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-    target_include_directories(benchmark SYSTEM INTERFACE ${BENCHMARK_INCLUDE_DIRS})
-endif()
-
-# get all test cpp and header files
-file(GLOB_RECURSE TEST_SOURCES_${TARGET_NAME} CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.h)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/test PREFIX "test_${TARGET_NAME}" FILES ${TEST_SOURCES_${TARGET_NAME}})
-
-# Setup the test executable
-add_executable(Test_${TARGET_NAME} ${TEST_SOURCES_${TARGET_NAME}})
-set_property(TARGET Test_${TARGET_NAME} PROPERTY CXX_STANDARD 20)
-
-# Add include directories for all folders in test
-file(GLOB_RECURSE TEST_DIRS_${TARGET_NAME} LIST_DIRECTORIES true ${CMAKE_CURRENT_LIST_DIR}/test)
-
-foreach (DIR ${TEST_DIRS}_${TARGET_NAME})
-    if (IS_DIRECTORY ${DIR})
-        target_include_directories(Test_${TARGET_NAME} PRIVATE ${DIR})
-    endif ()
-endforeach ()
-
-# Link the test executable against gtest_main and google benchmark
-target_link_libraries(Test_${TARGET_NAME} PRIVATE gtest_main benchmark)
-
-# We can't link again to the shared juce target without ODL violations (https://github.com/sudara/pamplejuce/issues/31, https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2)
-# Therefore we steal the compile definitions and include directories from the main target and pass them to our test target
-# Since we linked the shared juce targets in PRIVATE mode, they are not linked to the test target again
-target_link_libraries(Test_${TARGET_NAME} PRIVATE ${TARGET_NAME})
-target_compile_definitions(Test_${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${TARGET_NAME},COMPILE_DEFINITIONS>)
-# Use SYSTEM to suppress warnings
-target_include_directories(Test_${TARGET_NAME} SYSTEM PRIVATE $<TARGET_PROPERTY:${TARGET_NAME},INCLUDE_DIRECTORIES>)
-
-# include Loads and runs CMake code from the file given. Loads and runs CMake code from the file given.
-include(GoogleTest)
-
-if (CMAKE_OSX_ARCHITECTURES STREQUAL CMAKE_HOST_SYSTEM_PROCESSOR)
-    # gtest_discover_tests will register a CTest test for each gtest and run them all in parallel with the rest of the Test.
-    gtest_discover_tests(Test_${TARGET_NAME} DISCOVERY_TIMEOUT 90)
-endif ()
