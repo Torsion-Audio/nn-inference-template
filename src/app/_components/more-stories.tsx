@@ -21,6 +21,10 @@ export function MoreStories({ posts }: Props) {
       return "https://www.youtube.com/watch?v=z_RKgHU59r0";
     }
 
+    if (title === "") {
+      return "https://adc23-slides.torsion-audio.com";
+    }
+
     // If the title doesn't match the specific condition, return the original slug
     return slug;
   };
