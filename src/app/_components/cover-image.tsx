@@ -9,6 +9,8 @@ type Props = {
 };
 
 const CoverImage = ({ title, src, slug }: Props) => {
+  const isExternalLink = slug?.startsWith('https');
+
   const image = (
     <Image
       src={src}
@@ -20,13 +22,23 @@ const CoverImage = ({ title, src, slug }: Props) => {
       height={630}
     />
   );
+
   return (
     <div className="sm:mx-0">
       {slug ? (
-        <Link as={`/posts/${slug}`} href="/posts/[slug]" aria-label={title}>
-          {image}
-        </Link>
+        isExternalLink ? (
+          // If the slug starts with 'https', render an <a> tag for an external link
+          <a href={slug} aria-label={title} target="_blank" rel="noopener noreferrer">
+            {image}
+          </a>
+        ) : (
+          // For internal navigation, use Next.js's <Link> component
+          <Link as={`/posts/${slug}`} href="/posts/[slug]" aria-label={title}>
+            {image}
+          </Link>
+        )
       ) : (
+        // If no slug is provided, just display the image without wrapping it in a link
         image
       )}
     </div>
