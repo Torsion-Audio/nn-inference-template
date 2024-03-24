@@ -21,7 +21,7 @@ export function MoreStories({ posts }: Props) {
       return "https://www.youtube.com/watch?v=z_RKgHU59r0";
     }
 
-    if (title === "") {
+    if (title === "ADC23 Talk: Inspect Slides") {
       return "https://adc23-slides.torsion-audio.com";
     }
 
