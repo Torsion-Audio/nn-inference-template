@@ -24,10 +24,33 @@ export function PostPreview({
   // Function to check if slug starts with "https://"
   const isExternalLink = slug.startsWith("https://");
 
+  const modifySlug = (slug: string, title: string): string => {
+    // Check if the title matches the specific condition
+    if (title === "Following Up: New Unified Inference Library") {
+      return "https://github.com/tu-studio/anira";
+    }
+
+    if (title === "ADC23 Talk: Source Code") {
+      return "https://github.com/Torsion-Audio/nn-inference-template";
+    }
+
+    if (title === "ADC23 Talk: Watch Video") {
+      return "https://www.youtube.com/watch?v=z_RKgHU59r0";
+    }
+
+    if (title === "ADC23 Talk: Inspect Slides") {
+      return "https://adc23-slides.torsion-audio.com";
+    }
+
+    // If the title doesn't match the specific condition, return the original slug
+    return slug;
+  };
+
+  
   return (
     <div>
       <div className="mb-5">
-        <CoverImage slug={slug} title={title} src={coverImage} />
+        <CoverImage slug={modifySlug(post.slug, post.title)} title={title} src={coverImage} />
       </div>
       <h3 className="text-3xl mb-3 leading-snug">
         {isExternalLink ? (
