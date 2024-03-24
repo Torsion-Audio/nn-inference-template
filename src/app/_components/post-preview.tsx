@@ -50,7 +50,7 @@ export function PostPreview({
   return (
     <div>
       <div className="mb-5">
-        <CoverImage slug={modifySlug(post.slug, post.title)} title={title} src={coverImage} />
+        <CoverImage slug={modifySlug(slug, title)} title={title} src={coverImage} />
       </div>
       <h3 className="text-3xl mb-3 leading-snug">
         {isExternalLink ? (
