@@ -8,8 +8,12 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: `nn-inference-template`,
-  description: `nn-inference-template`
+  description: `nn-inference-template`,
+  openGraph: {
+    images: ['/nn-inference-template/assets/blog/resources/cover.jpg'],
+  },
 };
+
 
 export default function RootLayout({
   children,
