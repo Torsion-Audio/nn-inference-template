@@ -1,5 +1,4 @@
 import Footer from "@/app/_components/footer";
-import { CMS_NAME, HOME_OG_IMAGE_URL } from "@/lib/constants";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -9,10 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: `nn-inference-template`,
-  description: `nn-inference-template`,
-  openGraph: {
-    images: [HOME_OG_IMAGE_URL],
-  },
+  description: `nn-inference-template`
 };
 
 export default function RootLayout({
