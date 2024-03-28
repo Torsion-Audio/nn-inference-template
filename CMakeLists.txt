@@ -1,25 +1,34 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Sets the minimum macOS version
-if (APPLE)
-	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum version of the target platform" FORCE) 
-	if(CMAKE_OSX_DEPLOYMENT_TARGET)
-		message("The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
-	endif()
-endif ()
+# ==============================================================================
+# Define the options for the nn-inference-template
+# ==============================================================================
 
-cmake_minimum_required(VERSION 3.15)
+option(NNITEMPLATE_WITH_INSTALL "Add install targets" ON)
+
+# ==============================================================================
+# Setup the project
+# ==============================================================================
 
 set (PROJECT_NAME nn-inference-template)
 
 project (${PROJECT_NAME} VERSION 0.0.1)
 
+# Sets the minimum macOS version
+if (APPLE)
+	set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum version of the target platform" FORCE) 
+	if(CMAKE_OSX_DEPLOYMENT_TARGET)
+		message("The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
+	endif()
+endif ()
+
 # Sets the cpp language minimum
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# This disables the default behavior of adding all targets to the CTest dashboard, when adding libraries with the fetchcontent module
-set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+if(NNITEMPLATE_WITH_INSTALL)
+    set(ANIRA_WITH_INSTALL ON)
+endif()
 
 # ==============================================================================
 # Add the anira library
@@ -27,6 +36,7 @@ set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 
 # Either add the anira library as a git submodule and use add_subdirectory
 add_subdirectory(modules/anira)
+
 # Or download the latest release from github and the folder to the cmake prefix path and use find_package
 # list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_LIST_DIR}/modules/anira-x.x.x")
 # find_package(anira REQUIRED)
@@ -35,12 +45,11 @@ add_subdirectory(modules/anira)
 # Add the JUCE library
 # ==============================================================================
 
-add_subdirectory(modules/JUCE)
+# EXCLUDE_FROM_ALL so that juce does not get installed, because we build it as static lib
+add_subdirectory(modules/JUCE EXCLUDE_FROM_ALL)
 
 # ==============================================================================
-
 # Plug-In / Standalone setup
-
 # ==============================================================================
 
 set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
@@ -60,7 +69,8 @@ endif()
 # Include the assets and common directories
 add_subdirectory(assets)
 
-set (TARGET_NAME NN_Inference_Template)
+set(TARGET_NAME NN_Inference_Template)
+set(PRODUCT_NAME "NN Inference Template")
 
 juce_add_plugin(${TARGET_NAME}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -87,7 +97,7 @@ juce_add_plugin(${TARGET_NAME}
 		endif()
 
 		FORMATS ${FORMATS_TO_BUILD}                     # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-		PRODUCT_NAME "NN Inference Template"			            # The name of the final executable, which can differ from the target name
+		PRODUCT_NAME ${PRODUCT_NAME}			            # The name of the final executable, which can differ from the target name
 		)
 
 juce_generate_juce_header(${TARGET_NAME})
@@ -131,3 +141,11 @@ target_link_libraries(${TARGET_NAME}
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+# ==============================================================================
+# Add install target for the plugin
+# ==============================================================================
+
+if(NNITEMPLATE_WITH_INSTALL)
+    include(cmake/install.cmake)
+endif()  
