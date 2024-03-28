@@ -136,8 +136,6 @@ jobs:
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }};
                         # mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.dylib ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/${{ env.RELEASE_NAME }}.dylib;
                         # mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${{ env.RELEASE_NAME }}.app" ${{ env.PACKAGE_DIR }};
-                    elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
-                        # mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${{ env.RELEASE_NAME }}.exe" ${{ env.PACKAGE_DIR }};
                     else
                         echo "Unknown OS";
                     fi;
