@@ -106,7 +106,7 @@ jobs:
             # Test the project
             -   name: install target
                 shell: bash
-                run: cmake --install build --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
+                run: cmake --install build
 
             -   name: define the current version
                 shell: bash
