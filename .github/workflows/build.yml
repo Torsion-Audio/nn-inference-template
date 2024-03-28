@@ -127,13 +127,20 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}
+                    rm -r ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/cmake
                     mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
+                    # Add the libs
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/"
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PACKAGE_DIR }}
+                        cp ${{ env.PACKAGE_DIR }}/lib "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
                     elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
+                        cp "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
+                        cp "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component/Contents/"
+                        cp "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app/Contents/"
                     else
                         echo "Unknown OS";
                     fi;
@@ -189,9 +196,6 @@ jobs:
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.component";
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.app";
                     cd ..
-                    # Add the libs
-                    mv ../${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PRODUCT_NAME }}/
-                    rm -r ${{ env.PRODUCT_NAME }}/lib/cmake
                     # And finally zip it again
                     zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
                 

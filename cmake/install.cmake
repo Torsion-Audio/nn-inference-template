@@ -20,20 +20,20 @@ if(LINUX)
     )
     set_target_properties(${TARGET_NAME}_VST3
         PROPERTIES
-            INSTALL_RPATH "$ORIGIN/../../../lib"
+            INSTALL_RPATH "$ORIGIN/../lib"
     )
 elseif(APPLE)
     set_target_properties(${TARGET_NAME}_Standalone
     PROPERTIES
-        INSTALL_RPATH "@loader_path/../../../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
+        INSTALL_RPATH "@loader_path/../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
     )
     set_target_properties(${TARGET_NAME}_VST3
     PROPERTIES
-        INSTALL_RPATH "@loader_path/../../../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
+        INSTALL_RPATH "@loader_path/../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
     )
     set_target_properties(${TARGET_NAME}_AU
     PROPERTIES
-        INSTALL_RPATH "@loader_path/../../../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
+        INSTALL_RPATH "@loader_path/../lib;/opt/intel/oneapi/mkl/2023.0.0/lib;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64;/opt/intel/oneapi/mkl/2023.0.0/lib/intel64_win;/opt/intel/oneapi/mkl/2023.0.0/lib/win-x64"
     )
 endif()
 
