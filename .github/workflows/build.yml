@@ -53,8 +53,8 @@ jobs:
                 shell: bash
                 run: |
                     echo ${{ github.ref }}
-                    echo "TARGET_NAME=${TARGET_NAME}";
-                    echo "RELEASE_NAME=${RELEASE_NAME}";
+                    echo "TARGET_NAME=${{ env.TARGET_NAME }}";
+                    echo "RELEASE_NAME=${{ env.RELEASE_NAME }}";
                     echo "matrix.name=${{ matrix.name }}";
                     echo "matrix.os=${{ matrix.os }}";
 
@@ -90,11 +90,11 @@ jobs:
                 shell: bash
                 run: |
                     if [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
-                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="x86_64"
+                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="x86_64" -DNNITEMPLATE_WITH_INSTALL=ON
                     elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
-                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="arm64"
+                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="arm64" -DNNITEMPLATE_WITH_INSTALL=ON
                     else
-                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+                        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DNNITEMPLATE_WITH_INSTALL=ON
                     fi;
 
             # Build the project
@@ -103,33 +103,40 @@ jobs:
                 run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
             
             # Test the project
-            -   name: ctest
-                if: ${{ matrix.name != 'macOS-arm64' }}
-                working-directory: ${{github.workspace}}/build
-                run: ctest --verbose
+            -   name: install target
+                shell: bash
+                run: cmake --install build --parallel ${{ env.CMAKE_BUILD_PARALLEL_LEVEL }}
+
+            -   name: define the current version
+                shell: bash
+                run: |
+                    version=$(grep 'CMAKE_PROJECT_VERSION:STATIC' build/CMakeCache.txt | cut -d'=' -f2)
+                    echo "NNIT_VERSION=${version}" >> $GITHUB_ENV
+                    echo "current nn-inference-template version: ${version}"
 
             # Declaring the product name and the packaging directory
             -   name: declare artefact variables
                 shell: bash
                 run: |
-                    echo "PACKAGE_DIR=artefacts/${{ env.PROJECT_NAME }}-${{ matrix.name}}" >> $GITHUB_ENV
-                    echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.name }}" >> $GITHUB_ENV
+                    echo "PACKAGE_DIR=artefacts/${{ env.PROJECT_NAME }}-${{ env.NNIT_VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+                    echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-${{ env.NNIT_VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
         
             # Moving the artefacts to a packaging directory
             -   name: move artefacts
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}
-                    if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/VST3/${RELEASE_NAME}.vst3" ${{ env.PACKAGE_DIR }};
+                    mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
+                    mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
+                    if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/${{ env.RELEASE_NAME }}.so;
                     fi;
                     if [ "${{ matrix.os }}" == "macOS-latest" ]; then
-                        mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/AU/${RELEASE_NAME}.component" ${{ env.PACKAGE_DIR }};
-                        mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.app" ${{ env.PACKAGE_DIR }};
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }};
+                        # mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.dylib ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/${{ env.RELEASE_NAME }}.dylib;
+                        # mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${{ env.RELEASE_NAME }}.app" ${{ env.PACKAGE_DIR }};
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
-                        mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}.exe" ${{ env.PACKAGE_DIR }};
-                    elif [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        mv "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${RELEASE_NAME}" ${{ env.PACKAGE_DIR }};
+                        # mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${{ env.RELEASE_NAME }}.exe" ${{ env.PACKAGE_DIR }};
                     else
                         echo "Unknown OS";
                     fi;
@@ -148,17 +155,17 @@ jobs:
                 if: ${{ matrix.os == 'macOS-latest' }}
                 run: |
                     if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3" --deep --strict --options=runtime --timestamp;
+                        codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3" --deep --strict --options=runtime --timestamp;
                     fi;
-                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component" --deep --strict --options=runtime --timestamp;
+                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component" --deep --strict --options=runtime --timestamp;
                     # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
-                    codesign --entitlements "${{ env.BUILD_DIR }}/${TARGET_NAME}_artefacts/JuceLibraryCode/${TARGET_NAME}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app" --deep --strict --options=runtime --timestamp;
+                    codesign --entitlements "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/JuceLibraryCode/${{ env.TARGET_NAME }}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app" --deep --strict --options=runtime --timestamp;
                     # Here we check the code signitures
                     if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.vst3";
+                        codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3";
                     fi;
-                    codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.component";
-                    codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${RELEASE_NAME}.app";
+                    codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component";
+                    codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app";
         
             # Zip the artefact
             -   name: zip artefacts
@@ -186,10 +193,10 @@ jobs:
                     unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
                     cd ${{ env.PRODUCT_NAME }}
                     if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        xcrun stapler staple "${RELEASE_NAME}.vst3";
+                        xcrun stapler staple "${{ env.RELEASE_NAME }}.vst3";
                     fi;
-                    xcrun stapler staple "${RELEASE_NAME}.component";
-                    xcrun stapler staple "${RELEASE_NAME}.app";
+                    xcrun stapler staple "${{ env.RELEASE_NAME }}.component";
+                    xcrun stapler staple "${{ env.RELEASE_NAME }}.app";
                     cd ..
                     # And finally zip it again
                     zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
