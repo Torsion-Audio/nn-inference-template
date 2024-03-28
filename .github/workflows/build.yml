@@ -137,7 +137,6 @@ jobs:
                     else
                         echo "Unknown OS";
                     fi;
-                    mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PACKAGE_DIR }}
 
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)
@@ -190,6 +189,9 @@ jobs:
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.component";
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.app";
                     cd ..
+                    # Add the libs
+                    mv ../${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PRODUCT_NAME }}/
+                    rm -r ${{ env.PRODUCT_NAME }}/lib/cmake
                     # And finally zip it again
                     zip -vr ${{ env.PRODUCT_NAME }}.zip ${{ env.PRODUCT_NAME }}/ -x "*.DS_Store"
                 
