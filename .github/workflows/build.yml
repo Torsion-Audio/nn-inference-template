@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - develop
     # This is needed otherwise the github.ref is not set with ref/tags/v...
     tags:
       - 'v*.*.*'
