@@ -127,15 +127,13 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}
-                    mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
                     mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/"
-                    fi;
-                    if [ "${{ matrix.os }}" == "macOS-latest" ]; then
-                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }};
-                        # mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.dylib ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/${{ env.RELEASE_NAME }}.dylib;
-                        # mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/Standalone/${{ env.RELEASE_NAME }}.app" ${{ env.PACKAGE_DIR }};
+                    elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
                     else
                         echo "Unknown OS";
                     fi;
