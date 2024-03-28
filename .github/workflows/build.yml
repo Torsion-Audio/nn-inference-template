@@ -139,6 +139,7 @@ jobs:
                     else
                         echo "Unknown OS";
                     fi;
+                    mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PACKAGE_DIR }}
 
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)
