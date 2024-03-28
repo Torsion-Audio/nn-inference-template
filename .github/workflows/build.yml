@@ -130,7 +130,7 @@ jobs:
                     mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
                     mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/${{ env.RELEASE_NAME }}.so;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so ${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/
                     fi;
                     if [ "${{ matrix.os }}" == "macOS-latest" ]; then
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }};
@@ -155,16 +155,12 @@ jobs:
             -   name: codesign (macOS)
                 if: ${{ matrix.os == 'macOS-latest' }}
                 run: |
-                    if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3" --deep --strict --options=runtime --timestamp;
-                    fi;
+                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3" --deep --strict --options=runtime --timestamp;
                     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component" --deep --strict --options=runtime --timestamp;
                     # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
                     codesign --entitlements "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/JuceLibraryCode/${{ env.TARGET_NAME }}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app" --deep --strict --options=runtime --timestamp;
                     # Here we check the code signitures
-                    if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3";
-                    fi;
+                    codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3";
                     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component";
                     codesign -dv --verbose=4 "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app";
         
@@ -193,9 +189,7 @@ jobs:
                     # Then we need to unzip it and staple the ticket for the gatekeeper to all binaries
                     unzip ${{ env.PRODUCT_NAME }}.zip && rm ${{ env.PRODUCT_NAME }}.zip
                     cd ${{ env.PRODUCT_NAME }}
-                    if [ "${{ matrix.name }}" != "macOS-arm64" ]; then
-                        xcrun stapler staple "${{ env.RELEASE_NAME }}.vst3";
-                    fi;
+                    xcrun stapler staple "${{ env.RELEASE_NAME }}.vst3";
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.component";
                     xcrun stapler staple "${{ env.RELEASE_NAME }}.app";
                     cd ..
