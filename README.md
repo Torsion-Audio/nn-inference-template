@@ -10,6 +10,8 @@
 
 ![mockup](assets/graphics/mockup.png)
 
+![Build Status](https://github.com/Torsion-Audio/nn-inference-template/actions/workflows/build.yml/badge.svg)
+
 This repository provides a comprehensive JUCE plugin template that demonstrates the use of [anira](https://github.com/tu-studio/anira) to implement neural network inference in real-time audio applications. In this template, we use all three inference engines currently supported by the library:
 
 - TensorFlow Lite
