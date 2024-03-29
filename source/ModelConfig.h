@@ -3,19 +3,38 @@
 
 #include <anira/anira.h>
 
+#ifdef INSTALL_VERSION
+#if __unix__
+// TODO: Use a more reliable solution to get the user
+static std::string user = getenv("USER");
+#endif
+#if __linux__
+static std::string path_prefix_pytorch = std::string("/home/") + user + std::string("/.config/nn-inference-template/GuitarLSTM/pytorch-version/models/");
+static std::string path_prefix_tflite = std::string("/home/") + user + std::string("/.config/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
+#elif __APPLE__
+static std::string path_prefix_pytorch = std::string("/Users/") + user + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/pytorch-version/models/");
+static std::string path_prefix_tflite = std::string("/Users/") + user + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
+#elif _WIN32
+#define PATH_PREFIX TODO
+#endif
+#else
+static std::string path_prefix_pytorch = std::string(GUITARLSTM_MODELS_PATH_PYTORCH);
+static std::string path_prefix_tflite = std::string(GUITARLSTM_MODELS_PATH_TENSORFLOW);
+#endif
+
 static anira::InferenceConfig hybridNNConfig(
 #ifdef USE_LIBTORCH
-        GUITARLSTM_MODELS_PATH_PYTORCH + std::string("model_0/GuitarLSTM-dynamic.pt"),
+        path_prefix_pytorch + std::string("model_0/GuitarLSTM-dynamic.pt"),
         {256, 1, 150},
         {256, 1},
 #endif
 #ifdef USE_ONNXRUNTIME
-        GUITARLSTM_MODELS_PATH_PYTORCH + std::string("model_0/GuitarLSTM-libtorch-dynamic.onnx"),
+        path_prefix_pytorch + std::string("model_0/GuitarLSTM-libtorch-dynamic.onnx"),
         {256, 1, 150},
         {256, 1},
 #endif
 #ifdef USE_TFLITE
-        GUITARLSTM_MODELS_PATH_TENSORFLOW + std::string("model_0/GuitarLSTM-256.tflite"),
+        path_prefix_tflite + std::string("model_0/GuitarLSTM-256.tflite"),
         {256, 150, 1},
         {256, 1},
 #endif
