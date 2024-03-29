@@ -10,9 +10,8 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-${PROJECT_V
 
 # at install the rpath is cleared by default so we have to set it again for the installed shared library to find the other libraries
 # in this case we set the rpath to the directories where the other libraries are installed
-# $ORIGIN is a special token that gets replaced by the directory of the library at runtime from that point we could navigate to the other libraries
-# it is a little strange but the onnxruntime library and libtorch work without this setting in the JUCE example... but tensorflowlite does not
-
+# $ORIGIN in Linux is a special token that gets replaced by the directory of the library at runtime from that point we could navigate to the other libraries
+# The same token for macOS is @loader_path
 if(LINUX)
     set_target_properties(${TARGET_NAME}_Standalone
         PROPERTIES

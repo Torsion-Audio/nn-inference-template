@@ -52,18 +52,10 @@ add_subdirectory(modules/JUCE EXCLUDE_FROM_ALL)
 # Plug-In / Standalone setup
 # ==============================================================================
 
-set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
-set(GUITARLSTM_MODELS_PATH_PYTORCH "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/pytorch-version/models/")
-
-add_compile_definitions(
-        GUITARLSTM_MODELS_PATH_TENSORFLOW="${GUITARLSTM_MODELS_PATH_TENSORFLOW}"
-        GUITARLSTM_MODELS_PATH_PYTORCH="${GUITARLSTM_MODELS_PATH_PYTORCH}"
-)
-
 if(APPLE)
-	set(FORMATS_TO_BUILD AU VST3 Standalone)
+set(FORMATS_TO_BUILD AU VST3 Standalone)
 else()
-	set(FORMATS_TO_BUILD VST3 Standalone)
+set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
 
 # Include the assets and common directories
@@ -73,34 +65,49 @@ set(TARGET_NAME NN_Inference_Template)
 set(PRODUCT_NAME "NN Inference Template")
 
 juce_add_plugin(${TARGET_NAME}
-		# VERSION ...                               # Set this if the plugin version is different to the project version
-		# ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
-		# ICON_SMALL ...
-		COMPANY_NAME "AckvaSchulz"
-		# IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
-		# NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
-		# NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
-		# IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
-		# EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
-		# COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
-		PLUGIN_MANUFACTURER_CODE AcSc              # A four-character manufacturer id with at least one upper-case character
-		PLUGIN_CODE Nnit                            # A unique four-character plugin id with exactly one upper-case character
-		# GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
+# VERSION ...                               # Set this if the plugin version is different to the project version
+# ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
+# ICON_SMALL ...
+COMPANY_NAME "AckvaSchulz"
+# IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
+# NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
+# NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
+# IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
+# EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
+# COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
+PLUGIN_MANUFACTURER_CODE AcSc              # A four-character manufacturer id with at least one upper-case character
+PLUGIN_CODE Nnit                            # A unique four-character plugin id with exactly one upper-case character
+# GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 
-        VST3_AUTO_MANIFEST FALSE
+VST3_AUTO_MANIFEST FALSE
 
-		if(APPLE)
-            HARDENED_RUNTIME_ENABLED TRUE
-            HARDENED_RUNTIME_OPTIONS "com.apple.security.device.audio-input"
-            MICROPHONE_PERMISSION_ENABLED TRUE
-            MICROPHONE_PERMISSION_TEXT "Need access to your audio interface"
-		endif()
+if(APPLE)
+HARDENED_RUNTIME_ENABLED TRUE
+HARDENED_RUNTIME_OPTIONS "com.apple.security.device.audio-input"
+MICROPHONE_PERMISSION_ENABLED TRUE
+MICROPHONE_PERMISSION_TEXT "Need access to your audio interface"
+endif()
 
-		FORMATS ${FORMATS_TO_BUILD}                     # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-		PRODUCT_NAME ${PRODUCT_NAME}			            # The name of the final executable, which can differ from the target name
-		)
+FORMATS ${FORMATS_TO_BUILD}                     # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+PRODUCT_NAME ${PRODUCT_NAME}			            # The name of the final executable, which can differ from the target name
+)
 
 juce_generate_juce_header(${TARGET_NAME})
+
+if(NOT NNITEMPLATE_WITH_INSTALL)
+    # Set the model path as compile definition for the build interface
+    set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
+    set(GUITARLSTM_MODELS_PATH_PYTORCH "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/pytorch-version/models/")
+else()
+    set(GUITARLSTM_MODELS_PATH_TENSORFLOW "/usr/local/share/GuitarLSTM/tensorflow-version/models/")
+    set(GUITARLSTM_MODELS_PATH_PYTORCH "/usr/local/share/GuitarLSTM/pytorch-version/models/")
+endif()
+
+target_compile_definitions(${TARGET_NAME}
+    PUBLIC
+    GUITARLSTM_MODELS_PATH_TENSORFLOW="${GUITARLSTM_MODELS_PATH_TENSORFLOW}"
+    GUITARLSTM_MODELS_PATH_PYTORCH="${GUITARLSTM_MODELS_PATH_PYTORCH}"
+)
 
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)
