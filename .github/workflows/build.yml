@@ -138,9 +138,7 @@ jobs:
                     elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
-                        cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
-                        cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component/Contents/"
-                        cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app/Contents/"
+                        # for macOS the libs are added after codesigning
                     else
                         echo "Unknown OS";
                     fi;
@@ -158,8 +156,17 @@ jobs:
             -   name: codesign (macOS)
                 if: ${{ matrix.os == 'macOS-latest' }}
                 run: |
+                    # codesign all libs
+                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dylib --deep --strict --options=runtime --timestamp;
+                    # Then we add the libs to the bundles
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component/Contents/"
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app/Contents/"
+
+                    # codesign the plugins
                     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3" --deep --strict --options=runtime --timestamp;
                     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component" --deep --strict --options=runtime --timestamp;
+
                     # The standalone needs to have specific entitlements, which we need to add when we codesign the files. Since we have set the entitlements in the CMakeLists.txt we can use the generated file in the location below
                     codesign --entitlements "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/JuceLibraryCode/${{ env.TARGET_NAME }}_Standalone.entitlements" --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app" --deep --strict --options=runtime --timestamp;
                     # Here we check the code signitures
