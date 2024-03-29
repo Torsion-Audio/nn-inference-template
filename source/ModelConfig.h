@@ -13,7 +13,9 @@ static std::string home = getenv("HOME");
 static std::string path_prefix_pytorch = home + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/pytorch-version/models/");
 static std::string path_prefix_tflite = home + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
 #elif _WIN32
-#define PATH_PREFIX TODO
+#include <filesystem>
+static std::string path_prefix_pytorch = std::filesystem::path {getenv("APPDATA")}.string() + std::string("/nn-inference-template/GuitarLSTM/pytorch-version/models/");
+static std::string path_prefix_tflite = std::filesystem::path {getenv("APPDATA")}.string() + std::string("/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
 #endif
 #else
 static std::string path_prefix_pytorch = std::string(GUITARLSTM_MODELS_PATH_PYTORCH);
