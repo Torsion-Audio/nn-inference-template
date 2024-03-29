@@ -4,16 +4,14 @@
 #include <anira/anira.h>
 
 #ifdef INSTALL_VERSION
-#if __unix__
-// TODO: Use a more reliable solution to get the user
-static std::string user = getenv("USER");
-#endif
 #if __linux__
-static std::string path_prefix_pytorch = std::string("/home/") + user + std::string("/.config/nn-inference-template/GuitarLSTM/pytorch-version/models/");
-static std::string path_prefix_tflite = std::string("/home/") + user + std::string("/.config/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
+static std::string home = getenv("HOME");
+static std::string path_prefix_pytorch = home + std::string("/.config/nn-inference-template/GuitarLSTM/pytorch-version/models/");
+static std::string path_prefix_tflite = home + std::string("/.config/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
 #elif __APPLE__
-static std::string path_prefix_pytorch = std::string("/Users/") + user + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/pytorch-version/models/");
-static std::string path_prefix_tflite = std::string("/Users/") + user + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
+static std::string home = getenv("HOME");
+static std::string path_prefix_pytorch = home + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/pytorch-version/models/");
+static std::string path_prefix_tflite = home + std::string("/Library/Application Support/nn-inference-template/GuitarLSTM/tensorflow-version/models/");
 #elif _WIN32
 #define PATH_PREFIX TODO
 #endif
