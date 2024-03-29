@@ -8,6 +8,17 @@ include(GNUInstallDirs)
 # define the dircetory where the library will be installed CMAKE_INSTALL_PREFIX
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-${PROJECT_VERSION}" CACHE PATH "Where the library will be installed to" FORCE)
 
+# ==============================================================================
+# Install specific compile definition
+# ==============================================================================
+
+if(NNITEMPLATE_WITH_INSTALL)
+    target_compile_definitions(${TARGET_NAME}
+        PUBLIC
+        INSTALL_VERSION
+    )
+endif()
+
 # at install the rpath is cleared by default so we have to set it again for the installed shared library to find the other libraries
 # in this case we set the rpath to the directories where the other libraries are installed
 # $ORIGIN in Linux is a special token that gets replaced by the directory of the library at runtime from that point we could navigate to the other libraries
@@ -15,7 +26,7 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-${PROJECT_V
 if(LINUX)
     set_target_properties(${TARGET_NAME}_Standalone
         PROPERTIES
-            INSTALL_RPATH "$ORIGIN/lib"
+            INSTALL_RPATH "$ORIGIN/../lib"
     )
     set_target_properties(${TARGET_NAME}_VST3
         PROPERTIES

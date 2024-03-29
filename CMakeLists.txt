@@ -94,14 +94,9 @@ PRODUCT_NAME ${PRODUCT_NAME}			            # The name of the final executable, w
 
 juce_generate_juce_header(${TARGET_NAME})
 
-if(NOT NNITEMPLATE_WITH_INSTALL)
-    # Set the model path as compile definition for the build interface
-    set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
-    set(GUITARLSTM_MODELS_PATH_PYTORCH "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/pytorch-version/models/")
-else()
-    set(GUITARLSTM_MODELS_PATH_TENSORFLOW "/usr/local/share/GuitarLSTM/tensorflow-version/models/")
-    set(GUITARLSTM_MODELS_PATH_PYTORCH "/usr/local/share/GuitarLSTM/pytorch-version/models/")
-endif()
+# Set the model path as compile definition for the build interface
+set(GUITARLSTM_MODELS_PATH_TENSORFLOW "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/tensorflow-version/models/")
+set(GUITARLSTM_MODELS_PATH_PYTORCH "${CMAKE_CURRENT_LIST_DIR}/modules/GuitarLSTM/pytorch-version/models/")
 
 target_compile_definitions(${TARGET_NAME}
     PUBLIC
