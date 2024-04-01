@@ -155,7 +155,7 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0
-                    mkdir -p ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0
+                    mkdir -p ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0
                     
                     cp modules/GuitarLSTM/pytorch-version/models/model_0/*.pt ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0/
                     cp modules/GuitarLSTM/pytorch-version/models/model_0/*.onnx ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0/
