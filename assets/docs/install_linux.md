@@ -1,4 +1,4 @@
-# nn-inference-template - macOS Installation Guide
+# nn-inference-template - Linux Installation Guide
 
 **Copy Model Files**
 
