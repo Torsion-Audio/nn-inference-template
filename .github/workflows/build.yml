@@ -151,6 +151,18 @@ jobs:
                         echo "Unknown OS";
                     fi;
 
+            -   name: copy models to package
+                shell: bash
+                run: |
+                    mkdir -p ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0
+                    mkdir -p ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0
+                    
+                    cp git_repo/modules/GuitarLSTM/pytorch-version/models/model_0/*.pt ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0/
+                    cp git_repo/modules/GuitarLSTM/pytorch-version/models/model_0/*.onnx ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/pytorch-version/models/model_0/
+                    
+                    cp git_repo/modules/GuitarLSTM/tensorflow-version/models/model_0/*.tflite ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0/
+                    cp git_repo/modules/GuitarLSTM/tensorflow-version/models/model_0/*.onnx ${{ env.PACKAGE_DIR }}/models/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0/
+
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)
                 uses: apple-actions/import-codesign-certs@v2
