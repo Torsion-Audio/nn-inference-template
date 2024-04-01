@@ -165,15 +165,16 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}/docs
-                    
-                    cp assets/docs/install_win.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md
-                    
-                    # Install pandoc and a minimal set of LaTeX packages
-                    sudo apt-get update
-                    sudo apt-get install -y pandoc texlive-latex-base
-      
-                    # Convert the markdown document to PDF
-                    pandoc ${{ env.PACKAGE_DIR }}/docs/install_instructions.md -o ${{ env.PACKAGE_DIR }}/docs/install_instructions.pdf
+                                        
+                    if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
+                        cp assets/docs/install_linux.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md
+                    elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
+                        cp assets/docs/install_mac.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md   
+                    elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
+                        cp assets/docs/install_win.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md   
+                    else
+                        echo "Unknown OS";
+                    fi;
 
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)

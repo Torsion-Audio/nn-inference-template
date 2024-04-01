@@ -14,5 +14,5 @@ At runtime, the **nn-inference-template** ```.vst3``` and ```.exe``` will try to
 If you are running the **nn-inference-template** as an  ```.exe```,  place the libs next to it.
 If you are using it as a ```.vst3``` , the plugin will search for the libs next to the executable of your DAW.
 
-> You can also place the libs in your system directory ```C:\Windows\System32```, but be cautious not to overwrite existing shared libraries.
+>You can also place the libs in your system directory ```C:\Windows\System32```, but be cautious not to overwrite existing shared libraries.
 
