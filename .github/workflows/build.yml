@@ -164,15 +164,13 @@ jobs:
 
             -   name: copy install instructions
                 shell: bash
-                run: |
-                    mkdir -p ${{ env.PACKAGE_DIR }}/docs
-                                        
+                run: |                  
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        cp assets/docs/install_linux.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md
+                        cp assets/docs/install_linux.md ${{ env.PACKAGE_DIR }}/README.md
                     elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
-                        cp assets/docs/install_mac.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md   
+                        cp assets/docs/install_mac.md ${{ env.PACKAGE_DIR }}/README.md   
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
-                        cp assets/docs/install_win.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md   
+                        cp assets/docs/install_win.md ${{ env.PACKAGE_DIR }}/README.md   
                     else
                         echo "Unknown OS";
                     fi;
