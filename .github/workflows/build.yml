@@ -135,11 +135,18 @@ jobs:
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/"
                         mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PACKAGE_DIR }}
                         cp -r ${{ env.PACKAGE_DIR }}/lib "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
-                        elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
+                    elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
                         mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
                         # for macOS the libs are added after codesigning
+                    elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
+                        mkdir -p ${{ env.PACKAGE_DIR }}/standalone
+                        mkdir -p ${{ env.PACKAGE_DIR }}/vst3
+                        mkdir -p ${{ env.PACKAGE_DIR }}/shared_libs
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }}/standalone/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/vst3/;
+                        cp ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dll ${{ env.PACKAGE_DIR }}/shared_libs/;
                     else
                         echo "Unknown OS";
                     fi;
