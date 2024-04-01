@@ -40,6 +40,12 @@ cmake . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build cmake-build-release --config Release
 ```
 
+## Install instruction
+To install the plugin, please follow the instructions provided for your operating system:
+
+| [Linux](assets/docs/install_linux.md) | [macOS](assets/docs/install_mac.md) | [Windows](assets/docs/install_win.md) |
+|---|---|---|
+
 ## Unit Test / Benchmark
 
 The previous unit test for benchmarking the plugin performance across different audio configurations and inference backends is replaced by the benchmarking options within [anira](https://github.com/tu-studio/anira). These new benchmarks have been improved in many ways and provide a range of simple to complex benchmarks that can be used to compare the inference time for different models, inference engines, and audio configurations.
