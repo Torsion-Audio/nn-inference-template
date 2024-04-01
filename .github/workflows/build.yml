@@ -141,12 +141,10 @@ jobs:
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
                         # for macOS the libs are added after codesigning
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
-                        mkdir -p ${{ env.PACKAGE_DIR }}/standalone
-                        mkdir -p ${{ env.PACKAGE_DIR }}/vst3
-                        mkdir -p ${{ env.PACKAGE_DIR }}/shared_libs
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }}/standalone/;
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/vst3/;
-                        cp ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dll ${{ env.PACKAGE_DIR }}/shared_libs/;
+                        mkdir -p ${{ env.PACKAGE_DIR }}/lib
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }}/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/;
+                        cp ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dll ${{ env.PACKAGE_DIR }}/lib/;
                     else
                         echo "Unknown OS";
                     fi;
@@ -162,6 +160,20 @@ jobs:
                     
                     cp modules/GuitarLSTM/tensorflow-version/models/model_0/*.tflite ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0/
                     cp modules/GuitarLSTM/tensorflow-version/models/model_0/*.onnx ${{ env.PACKAGE_DIR }}/extras/nn-inference-template/GuitarLSTM/tensorflow-version/models/model_0/
+
+            -   name: copy install instructions
+                shell: bash
+                run: |
+                    mkdir -p ${{ env.PACKAGE_DIR }}/docs
+                    
+                    cp assets/docs/install_win.md ${{ env.PACKAGE_DIR }}/docs/install_instructions.md
+                    
+                    # Install pandoc and a minimal set of LaTeX packages
+                    sudo apt-get update
+                    sudo apt-get install -y pandoc texlive-latex-base
+      
+                    # Convert the markdown document to PDF
+                    pandoc ${{ env.PACKAGE_DIR }}/docs/install_instructions.md -o ${{ env.PACKAGE_DIR }}/docs/install_instructions.pdf
 
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)
