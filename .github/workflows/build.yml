@@ -142,8 +142,9 @@ jobs:
                         # for macOS the libs are added after codesigning
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
                         mkdir -p ${{ env.PACKAGE_DIR }}/lib
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }}/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/*.exe ${{ env.PACKAGE_DIR }}/;
                         mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/*.dll ${{ env.PACKAGE_DIR }}/lib/;
                         cp ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dll ${{ env.PACKAGE_DIR }}/lib/;
                     else
                         echo "Unknown OS";
