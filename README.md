@@ -22,7 +22,10 @@ This repository provides a comprehensive JUCE plugin template that demonstrates 
 
 ## Build instruction
 
-Build with CMake
+On **Apple Silicon Macs** you need to install the OpenMP library via Homebrew (``` brew install libomp ```)
+
+**Build with CMake**
+
 ```bash
 # clone the repository
 git clone https://github.com/Torsion-Audio/nn-inference-template/
@@ -40,7 +43,17 @@ cmake . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build cmake-build-release --config Release
 ```
 
-## Install instruction
+To run the plugin or standalone application with the default model, you need to copy the model files to the correct location. The application will attempt to load the neural models from the user's application data directory at runtime. Therefore, you must copy the folder ```./modules/GuitarLSTM/*``` to the following locations, depending on your operating system:
+
+Linux: ```~/.config/nn-inference-template/GuitarLSTM/*```
+
+macOS: ```~/Library/Application Support/nn-inference-template/GuitarLSTM/*```
+
+Windows: ```%APPDATA%\nn-inference-template\GuitarLSTM\*```
+
+
+## Install from release
+
 To install the plugin, please follow the instructions provided for your operating system:
 
 | [Linux](assets/docs/install_linux.md) | [macOS](assets/docs/install_mac.md) | [Windows](assets/docs/install_win.md) |
