@@ -19,12 +19,13 @@ if(NNITEMPLATE_WITH_INSTALL)
     )
 endif()
 
+set(INSTALL_TARGETS ${TARGET_NAME}_Standalone ${TARGET_NAME}_VST3)
+
 # at install the rpath is cleared by default so we have to set it again for the installed shared library to find the other libraries
 # in this case we set the rpath to the directories where the other libraries are installed
 # $ORIGIN in Linux is a special token that gets replaced by the directory of the library at runtime from that point we could navigate to the other libraries
 # The same token for macOS is @loader_path
 if(LINUX)
-    set(INSTALL_TARGETS ${TARGET_NAME}_Standalone ${TARGET_NAME}_VST3)
     foreach(TARGET ${INSTALL_TARGETS})
         set_target_properties(${TARGET}
             PROPERTIES
@@ -33,7 +34,7 @@ if(LINUX)
     endforeach()
 elseif(APPLE)
     set(OSX_RPATHS "@loader_path/../lib;@loader_path/../../../../lib;@loader_path/../../../")
-    set(INSTALL_TARGETS ${TARGET_NAME}_Standalone ${TARGET_NAME}_VST3 ${TARGET_NAME}_AU)
+    list(APPEND INSTALL_TARGETS ${TARGET_NAME}_AU)
     if (CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
         list(APPEND OSX_RPATHS "/opt/intel/oneapi/mkl/latest/lib")
     elseif (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
@@ -55,7 +56,6 @@ elseif(APPLE)
     endforeach()
 endif()
 
-message(${INSTALL_TARGETS})
 # install the target and create export-set
 install(TARGETS ${INSTALL_TARGETS}
     # these get default values from GNUInstallDirs
