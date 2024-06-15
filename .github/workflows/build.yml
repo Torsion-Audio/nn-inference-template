@@ -64,12 +64,19 @@ jobs:
             -   name: install deps
                 shell: bash
                 run: |
-                    if [ "${{ matrix.os }}" == "macOS-latest" ]; then
+                    if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
+                        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev ninja-build
+                    elif [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
                         brew install osxutils ninja
+                        echo "brew prefix: $(brew --prefix)"
+                    elif [ "${{ matrix.name }}" == "macOS-arm64" ]; then
+                        if [ "$(uname -m)" == "arm64" ]; then
+                            brew install libomp
+                        fi;
+                        brew install osxutils ninja
+                        echo "brew prefix: $(brew --prefix)"
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
                         choco install ninja
-                    elif [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev ninja-build
                     else
                         echo "Unknown OS";
                     fi;
