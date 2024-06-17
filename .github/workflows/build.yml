@@ -122,7 +122,7 @@ jobs:
                 run: |
                     version=$(grep 'CMAKE_PROJECT_VERSION:STATIC' build/CMakeCache.txt | cut -d'=' -f2)
                     echo "VERSION_NUMBER=${version}" >> $GITHUB_ENV
-                    echo "current nn-inference-template version: ${version}"
+                    echo "current version number: ${version}"
 
             # Declaring the product name and the packaging directory
             -   name: declare artefact variables
