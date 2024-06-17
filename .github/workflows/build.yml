@@ -121,39 +121,39 @@ jobs:
                 shell: bash
                 run: |
                     version=$(grep 'CMAKE_PROJECT_VERSION:STATIC' build/CMakeCache.txt | cut -d'=' -f2)
-                    echo "NNIT_VERSION=${version}" >> $GITHUB_ENV
+                    echo "VERSION_NUMBER=${version}" >> $GITHUB_ENV
                     echo "current nn-inference-template version: ${version}"
 
             # Declaring the product name and the packaging directory
             -   name: declare artefact variables
                 shell: bash
                 run: |
-                    echo "PACKAGE_DIR=artefacts/${{ env.PROJECT_NAME }}-${{ env.NNIT_VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
-                    echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-${{ env.NNIT_VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+                    echo "PACKAGE_DIR=artefacts/${{ env.PROJECT_NAME }}-${{ env.VERSION_NUMBER }}-${{ matrix.name }}" >> $GITHUB_ENV
+                    echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-${{ env.VERSION_NUMBER }}-${{ matrix.name }}" >> $GITHUB_ENV
         
             # Moving the artefacts to a packaging directory
             -   name: move artefacts
                 shell: bash
                 run: |
                     mkdir -p ${{ env.PACKAGE_DIR }}
-                    rm -r ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/cmake
+                    rm -r ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/cmake
                     # Add the libs
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin ${{ env.PACKAGE_DIR }};
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/bin ${{ env.PACKAGE_DIR }};
                         mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }};
-                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.so" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/"
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib ${{ env.PACKAGE_DIR }}
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/${{ env.RELEASE_NAME }}.so" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/x86_64-linux/"
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib ${{ env.PACKAGE_DIR }}
                         cp -r ${{ env.PACKAGE_DIR }}/lib "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
                     elif [ "${{ matrix.os }}" == "macOS-latest" ]; then
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/* ${{ env.PACKAGE_DIR }};
-                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
-                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/bin/* ${{ env.PACKAGE_DIR }};
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/${{ env.RELEASE_NAME }}.vst3" ${{ env.PACKAGE_DIR }}/
+                        mv "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/${{ env.RELEASE_NAME }}.component" ${{ env.PACKAGE_DIR }}/
                         # for macOS the libs are added after codesigning
                     elif [ "${{ matrix.name }}" == "Windows-x86_64" ]; then
                         mkdir -p ${{ env.PACKAGE_DIR }}/lib
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/bin/*.exe ${{ env.PACKAGE_DIR }}/;
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/;
-                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dll ${{ env.PACKAGE_DIR }}/lib/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/bin/*.exe ${{ env.PACKAGE_DIR }}/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/*.vst3 ${{ env.PACKAGE_DIR }}/;
+                        mv ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/*.dll ${{ env.PACKAGE_DIR }}/lib/;
                     else
                         echo "Unknown OS";
                     fi;
@@ -197,11 +197,11 @@ jobs:
                 if: ${{ matrix.os == 'macOS-latest' }}
                 run: |
                     # codesign all libs
-                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib/*.dylib --deep --strict --options=runtime --timestamp;
+                    codesign --force -s "${{ secrets.DEV_ID_APP }}" -v ${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib/*.dylib --deep --strict --options=runtime --timestamp;
                     # Then we add the libs to the bundles
-                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
-                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component/Contents/"
-                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.NNIT_VERSION }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app/Contents/"
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3/Contents/"
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.component/Contents/"
+                    cp -r "${{ env.BUILD_DIR }}/${{ env.TARGET_NAME }}-${{ env.VERSION_NUMBER }}/lib" "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.app/Contents/"
 
                     # codesign the plugins
                     codesign --force -s "${{ secrets.DEV_ID_APP }}" -v "${{ env.PACKAGE_DIR }}/${{ env.RELEASE_NAME }}.vst3" --deep --strict --options=runtime --timestamp;
