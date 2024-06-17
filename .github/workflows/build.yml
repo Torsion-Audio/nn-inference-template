@@ -185,7 +185,7 @@ jobs:
 
             # We need to import the apple developer certificate so that we can codesign our binaries
             -   name: import certificates (macOS)
-                uses: apple-actions/import-codesign-certs@v2
+                uses: apple-actions/import-codesign-certs@v3
                 if: ${{ matrix.os == 'macOS-latest' }}
                 with:
                     # GitHub encrypted secrets
