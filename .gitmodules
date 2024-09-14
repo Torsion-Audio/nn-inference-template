@@ -4,6 +4,3 @@
 [submodule "modules/GuitarLSTM"]
 	path = modules/GuitarLSTM
 	url = https://github.com/faressc/GuitarLSTM.git
-[submodule "modules/anira"]
-	path = modules/anira
-	url = https://github.com/tu-studio/anira.git
