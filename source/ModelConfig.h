@@ -41,7 +41,7 @@ static anira::InferenceConfig hybridNNConfig(
         10.66f,
         0,
         true,
-        0.5f,
+        0.0f,
         false
 );
 

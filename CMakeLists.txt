@@ -144,6 +144,11 @@ target_link_libraries(${TARGET_NAME}
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
+
+if (MSVC)
+    include(cmake/msvc-support.cmake)
+endif()
+
 # ==============================================================================
 # Add install target for the plugin
 # ==============================================================================
