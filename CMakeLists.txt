@@ -12,7 +12,7 @@ option(NNITEMPLATE_WITH_INSTALL "Add install targets" ON)
 
 set (PROJECT_NAME nn-inference-template)
 
-project (${PROJECT_NAME} VERSION 0.0.2)
+project (${PROJECT_NAME} VERSION 0.0.4)
 
 # Sets the minimum macOS version
 if (APPLE)

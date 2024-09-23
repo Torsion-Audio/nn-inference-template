@@ -10,4 +10,4 @@ At runtime, the **nn-inference-template** ```vst3```, ```component``` and ```sta
 
 ## Shared libs
 
-The macOS versions of the **nn-inference-template** are all bundled with the dynamic libraries for anira and the inference engines. However, on **Apple Silicon Macs** you need to install the OpenMP library via Homebrew (``` brew install libomp ```)
+The macOS versions of the **nn-inference-template** are all bundled with the dynamic libraries for anira and the inference engines.

@@ -22,8 +22,6 @@ This repository provides a comprehensive JUCE plugin template that demonstrates 
 
 ## Build instruction
 
-On **Apple Silicon Macs** you need to install the OpenMP library via Homebrew (``` brew install libomp ```)
-
 **Build with CMake**
 
 ```bash
