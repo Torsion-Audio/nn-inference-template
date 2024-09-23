@@ -214,7 +214,6 @@ void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID
         if (paramString == "LIBTORCH") {inferenceHandler.setInferenceBackend(anira::LIBTORCH);
         std::cout << "LIBTORCH" << std::endl;}
 #endif
-        if (paramString == "NONE") inferenceHandler.setInferenceBackend(anira::NONE);
     }
 }
 //==============================================================================
