@@ -12,6 +12,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
                        ),
         parameters (*this, nullptr, juce::Identifier (getName()), PluginParameters::createParameterLayout()),
+        prePostProcessor(inferenceConfig),
         inferenceHandler(prePostProcessor, inferenceConfig),
         dryWetMixer(32768) // 32768 samples of max latency compensation for the dry-wet mixer
 {
@@ -99,10 +100,9 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
                                  static_cast<juce::uint32>(samplesPerBlock),
                                  static_cast<juce::uint32>(1)};
 
-    anira::HostAudioConfig monoConfig {
-        1,
-        (size_t) samplesPerBlock,
-        sampleRate
+    anira::HostConfig monoConfig {
+        static_cast<float>(samplesPerBlock), // host_buffer_size
+        static_cast<float>(sampleRate)      // host_sample_rate
     };
 
     dryWetMixer.prepare(monoSpec);
@@ -110,10 +110,10 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     monoBuffer.setSize(1, samplesPerBlock);
     inferenceHandler.prepare(monoConfig);
 
-    auto newLatency = inferenceHandler.getLatency();
-    setLatencySamples(newLatency);
+    auto newLatency = inferenceHandler.get_latency();
+    setLatencySamples(static_cast<int>(newLatency));
 
-    dryWetMixer.setWetLatency(newLatency);
+    dryWetMixer.setWetLatency(static_cast<float>(newLatency));
 
     for (auto & parameterID : PluginParameters::getPluginParameterList()) {
         parameterChanged(parameterID, (float) parameters.getParameterAsValue(parameterID).getValue());
@@ -154,10 +154,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
-
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     stereoToMono(monoBuffer, buffer);
     dryWetMixer.pushDrySamples(monoBuffer);
@@ -203,15 +199,15 @@ void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID
         const auto paramInt = static_cast<int>(newValue);
         auto paramString = PluginParameters::backendTypes.getReference(paramInt);
 #ifdef USE_TFLITE
-        if (paramString == "TFLITE") {inferenceHandler.setInferenceBackend(anira::TFLITE);
+        if (paramString == "TFLITE") {inferenceHandler.set_inference_backend(anira::InferenceBackend::TFLITE);
         std::cout << "TFLITE" << std::endl;}
 #endif
 #ifdef USE_ONNXRUNTIME
-        if (paramString == "ONNXRUNTIME") {inferenceHandler.setInferenceBackend(anira::ONNX);
+        if (paramString == "ONNXRUNTIME") {inferenceHandler.set_inference_backend(anira::InferenceBackend::ONNX);
         std::cout << "ONNXRUNTIME" << std::endl;}
 #endif
 #ifdef USE_LIBTORCH
-        if (paramString == "LIBTORCH") {inferenceHandler.setInferenceBackend(anira::LIBTORCH);
+        if (paramString == "LIBTORCH") {inferenceHandler.set_inference_backend(anira::InferenceBackend::LIBTORCH);
         std::cout << "LIBTORCH" << std::endl;}
 #endif
     }
@@ -221,10 +217,6 @@ void AudioPluginAudioProcessor::parameterChanged(const juce::String &parameterID
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AudioPluginAudioProcessor();
-}
-
-anira::InferenceManager &AudioPluginAudioProcessor::getInferenceManager() {
-    return inferenceHandler.getInferenceManager();
 }
 
 void AudioPluginAudioProcessor::stereoToMono(juce::AudioBuffer<float> &targetMonoBlock,
