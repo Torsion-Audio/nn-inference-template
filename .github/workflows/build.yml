@@ -66,6 +66,9 @@ jobs:
                 run: |
                     if [ "${{ matrix.name }}" == "Linux-x86_64" ]; then
                         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev ninja-build
+                        # Fix the juce bug with ft2build.h not found
+                        sudo ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h
+                        sudo ln -s /usr/include/freetype2/freetype /usr/include/freetype
                     elif [ "${{ matrix.name }}" == "macOS-x86_64" ]; then
                         brew install osxutils ninja
                         echo "brew prefix: $(brew --prefix)"
